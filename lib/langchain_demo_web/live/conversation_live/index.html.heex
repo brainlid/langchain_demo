@@ -1,0 +1,38 @@
+<.header>
+  Conversations
+  <:actions>
+    <.link patch={~p"/conversations/new"}>
+      <.button>New Conversation</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<ul id="conversations" role="list" class="text-sm divide-y divide-gray-100">
+  <li :for={conversation <- @conversations} id={"row-#{conversation.id}"} class="relative flex justify-between gap-x-6 py-5 hover:bg-zinc-50 sm:rounded">
+    <div class="font-semibold text-zinc-900">
+      <.link navigate={~p"/conversations/#{conversation}"}>
+        <span class="absolute inset-x-0 -top-px bottom-0"></span>
+        <%= conversation.name %>
+      </.link>
+    </div>
+    <div>
+      <.link
+        phx-click={JS.push("delete", value: %{id: conversation.id}) |> hide("#row-#{conversation.id}")}
+        data-confirm="Are you sure you want to delete the conversation?"
+      >
+        <.icon name="hero-trash" class="text-red-900 w-4 h-4" />
+      </.link>
+    </div>
+  </li>
+</ul>
+
+<.modal :if={@live_action in [:new]} id="conversation-modal" show on_cancel={JS.patch(~p"/conversations")}>
+  <.live_component
+    module={LangchainDemoWeb.ConversationLive.FormComponent}
+    id={@conversation.id || :new}
+    title={@page_title}
+    action={@live_action}
+    conversation={@conversation}
+    patch={~p"/conversations"}
+  />
+</.modal>
