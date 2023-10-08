@@ -1,4 +1,4 @@
-defmodule LangchainDemo.Conversations.Conversation do
+defmodule LangChainDemo.Conversations.Conversation do
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -9,7 +9,7 @@ defmodule LangchainDemo.Conversations.Conversation do
     field :temperature, :float, default: 1.0
     field :frequency_penalty, :float, default: 0.0
 
-    has_many :messages, LangchainDemo.Messages.Message
+    has_many :messages, LangChainDemo.Messages.Message
     timestamps()
   end
 

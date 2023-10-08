@@ -1,4 +1,4 @@
-defmodule LangchainDemo.MixProject do
+defmodule LangChainDemo.MixProject do
   use Mix.Project
 
   def project do
@@ -18,7 +18,7 @@ defmodule LangchainDemo.MixProject do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {LangchainDemo.Application, []},
+      mod: {LangChainDemo.Application, []},
       extra_applications: [:logger, :runtime_tools]
     ]
   end

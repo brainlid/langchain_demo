@@ -1,9 +1,9 @@
-defmodule LangchainDemoWeb.ConversationLive.Index do
-  use LangchainDemoWeb, :live_view
+defmodule LangChainDemoWeb.ConversationLive.Index do
+  use LangChainDemoWeb, :live_view
   require Logger
 
-  alias LangchainDemo.Conversations
-  alias LangchainDemo.Conversations.Conversation
+  alias LangChainDemo.Conversations
+  alias LangChainDemo.Conversations.Conversation
 
   @impl true
   def mount(_params, _session, socket) do
@@ -38,7 +38,10 @@ defmodule LangchainDemoWeb.ConversationLive.Index do
   end
 
   @impl true
-  def handle_info({LangchainDemoWeb.ConversationLive.FormComponent, {:saved, conversation}}, socket) do
+  def handle_info(
+        {LangChainDemoWeb.ConversationLive.FormComponent, {:saved, conversation}},
+        socket
+      ) do
     {:noreply, stream_insert(socket, :conversations, conversation)}
   end
 

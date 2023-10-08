@@ -1,4 +1,4 @@
-defmodule LangchainDemoWeb.ConnCase do
+defmodule LangChainDemoWeb.ConnCase do
   @moduledoc """
   This module defines the test case to be used by
   tests that require setting up a connection.
@@ -11,7 +11,7 @@ defmodule LangchainDemoWeb.ConnCase do
   we enable the SQL sandbox, so changes done to the database
   are reverted at the end of every test. If you are using
   PostgreSQL, you can even run database tests asynchronously
-  by setting `use LangchainDemoWeb.ConnCase, async: true`, although
+  by setting `use LangChainDemoWeb.ConnCase, async: true`, although
   this option is not recommended for other databases.
   """
 
@@ -20,19 +20,19 @@ defmodule LangchainDemoWeb.ConnCase do
   using do
     quote do
       # The default endpoint for testing
-      @endpoint LangchainDemoWeb.Endpoint
+      @endpoint LangChainDemoWeb.Endpoint
 
-      use LangchainDemoWeb, :verified_routes
+      use LangChainDemoWeb, :verified_routes
 
       # Import conveniences for testing with connections
       import Plug.Conn
       import Phoenix.ConnTest
-      import LangchainDemoWeb.ConnCase
+      import LangChainDemoWeb.ConnCase
     end
   end
 
   setup tags do
-    LangchainDemo.DataCase.setup_sandbox(tags)
+    LangChainDemo.DataCase.setup_sandbox(tags)
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
 end

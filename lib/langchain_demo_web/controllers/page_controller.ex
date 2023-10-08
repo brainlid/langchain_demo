@@ -1,5 +1,5 @@
-defmodule LangchainDemoWeb.PageController do
-  use LangchainDemoWeb, :controller
+defmodule LangChainDemoWeb.PageController do
+  use LangChainDemoWeb, :controller
 
   def home(conn, _params) do
     # The home page is often custom made,

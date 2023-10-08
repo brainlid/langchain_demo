@@ -1,5 +1,5 @@
-defmodule LangchainDemoWeb.PageControllerTest do
-  use LangchainDemoWeb.ConnCase
+defmodule LangChainDemoWeb.PageControllerTest do
+  use LangChainDemoWeb.ConnCase
 
   test "GET /", %{conn: conn} do
     conn = get(conn, ~p"/")

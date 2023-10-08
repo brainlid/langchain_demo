@@ -1,7 +1,7 @@
 import Config
 
 # Configure your database
-config :langchain_demo, LangchainDemo.Repo,
+config :langchain_demo, LangChainDemo.Repo,
   database: Path.expand("../langchain_demo_dev.db", Path.dirname(__ENV__.file)),
   pool_size: 5,
   stacktrace: true,
@@ -13,10 +13,11 @@ config :langchain_demo, LangchainDemo.Repo,
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we use it
 # with esbuild to bundle .js and .css sources.
-config :langchain_demo, LangchainDemoWeb.Endpoint,
+config :langchain_demo, LangChainDemoWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
-  http: [ip: {127, 0, 0, 1}, port: 4004],
+  # http: [ip: {127, 0, 0, 1}, port: 4400],
+  http: [ip: {0, 0, 0, 0}, port: 4400],
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
@@ -50,7 +51,7 @@ config :langchain_demo, LangchainDemoWeb.Endpoint,
 # different ports.
 
 # Watch static and templates for browser reloading.
-config :langchain_demo, LangchainDemoWeb.Endpoint,
+config :langchain_demo, LangChainDemoWeb.Endpoint,
   live_reload: [
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",

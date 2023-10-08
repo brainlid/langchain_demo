@@ -1,4 +1,4 @@
-# ![Logo with chat chain links](./elixir-langchain-link-logo_32px.png) LangchainDemo
+# ![Logo with chat chain links](./elixir-langchain-link-logo_32px.png) LangChainDemo
 
 This project is a demonstration example using the [Elixir LangChain](https://github.com/brainlid/langchain) library and [Phoenix LiveView](https://www.phoenixframework.org/).
 

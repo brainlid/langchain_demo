@@ -1,14 +1,14 @@
-defmodule LangchainDemo.Conversations do
+defmodule LangChainDemo.Conversations do
   @moduledoc """
   The Conversations context.
   """
 
   import Ecto.Query, warn: false
   require Logger
-  alias LangchainDemo.Repo
+  alias LangChainDemo.Repo
 
-  alias LangchainDemo.Conversations.Conversation
-  alias LangchainDemo.Messages.Message
+  alias LangChainDemo.Conversations.Conversation
+  alias LangChainDemo.Messages.Message
 
   @doc """
   Returns the list of conversations.

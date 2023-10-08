@@ -1,4 +1,4 @@
-defmodule LangchainDemo.Repo do
+defmodule LangChainDemo.Repo do
   use Ecto.Repo,
     otp_app: :langchain_demo,
     adapter: Ecto.Adapters.SQLite3

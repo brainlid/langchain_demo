@@ -1,11 +1,11 @@
-defmodule LangchainDemoWeb.ConversationLive.Show do
-  use LangchainDemoWeb, :live_view
-  alias LangchainDemoWeb.ConversationLive.FormComponent
-  alias LangchainDemoWeb.ConversationLive.MessageFormComponent
-  alias LangchainDemo.Conversations
-  alias LangchainDemo.Conversations.Conversation
-  alias LangchainDemo.Messages
-  alias LangchainDemo.Messages.Message
+defmodule LangChainDemoWeb.ConversationLive.Show do
+  use LangChainDemoWeb, :live_view
+  alias LangChainDemoWeb.ConversationLive.FormComponent
+  alias LangChainDemoWeb.ConversationLive.MessageFormComponent
+  alias LangChainDemo.Conversations
+  alias LangChainDemo.Conversations.Conversation
+  alias LangChainDemo.Messages
+  alias LangChainDemo.Messages.Message
   alias LangChain.ChatModels.ChatOpenAI
   alias LangChain.Chains.LLMChain
   alias Phoenix.LiveView.AsyncResult

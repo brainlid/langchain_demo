@@ -1,3 +1,3 @@
-defmodule LangchainDemo.Mailer do
+defmodule LangChainDemo.Mailer do
   use Swoosh.Mailer, otp_app: :langchain_demo
 end

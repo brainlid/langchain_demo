@@ -1,11 +1,11 @@
-defmodule LangchainDemoWeb.Router do
-  use LangchainDemoWeb, :router
+defmodule LangChainDemoWeb.Router do
+  use LangChainDemoWeb, :router
 
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_live_flash
-    plug :put_root_layout, {LangchainDemoWeb.Layouts, :root}
+    plug :put_root_layout, {LangChainDemoWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
   end
@@ -14,7 +14,7 @@ defmodule LangchainDemoWeb.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/", LangchainDemoWeb do
+  scope "/", LangChainDemoWeb do
     pipe_through :browser
 
     get "/", PageController, :home
@@ -29,7 +29,7 @@ defmodule LangchainDemoWeb.Router do
   end
 
   # Other scopes may use custom stacks.
-  # scope "/api", LangchainDemoWeb do
+  # scope "/api", LangChainDemoWeb do
   #   pipe_through :api
   # end
 
@@ -45,7 +45,7 @@ defmodule LangchainDemoWeb.Router do
     scope "/dev" do
       pipe_through :browser
 
-      live_dashboard "/dashboard", metrics: LangchainDemoWeb.Telemetry
+      live_dashboard "/dashboard", metrics: LangChainDemoWeb.Telemetry
       forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
   end

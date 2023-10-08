@@ -8,16 +8,16 @@
 import Config
 
 config :langchain_demo,
-  ecto_repos: [LangchainDemo.Repo]
+  ecto_repos: [LangChainDemo.Repo]
 
 # Configures the endpoint
-config :langchain_demo, LangchainDemoWeb.Endpoint,
+config :langchain_demo, LangChainDemoWeb.Endpoint,
   url: [host: "localhost"],
   render_errors: [
-    formats: [html: LangchainDemoWeb.ErrorHTML, json: LangchainDemoWeb.ErrorJSON],
+    formats: [html: LangChainDemoWeb.ErrorHTML, json: LangChainDemoWeb.ErrorJSON],
     layout: false
   ],
-  pubsub_server: LangchainDemo.PubSub,
+  pubsub_server: LangChainDemo.PubSub,
   live_view: [signing_salt: "Z2RBy4NU"]
 
 # Configures the mailer
@@ -27,7 +27,7 @@ config :langchain_demo, LangchainDemoWeb.Endpoint,
 #
 # For production it's recommended to configure a different adapter
 # at the `config/runtime.exs`.
-config :langchain_demo, LangchainDemo.Mailer, adapter: Swoosh.Adapters.Local
+config :langchain_demo, LangChainDemo.Mailer, adapter: Swoosh.Adapters.Local
 
 # Configure esbuild (the version is required)
 config :esbuild,
