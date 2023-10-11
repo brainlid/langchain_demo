@@ -2,8 +2,14 @@
 
 <div class="px-4 py-10 sm:px-6 sm:py-28 lg:px-8 xl:px-28 xl:py-32">
   <div class="mx-auto max-w-xl lg:mx-0">
-    <h1 class="text-xl text-indigo-600 hover:text-indigo-500">
-      <.link navigate={~p"/conversations"}>Conversations</.link>
-    </h1>
+    <h1 class="text-xl">Where do you want to go?</h1>
+    <ul class="pl-6 list-disc text-lg text-indigo-600 hover:text-indigo-500">
+      <li>
+        <.link navigate={~p"/conversations"}>Conversations</.link>
+      </li>
+      <li>
+        <.link navigate={~p"/agent_chat"}>Personal Fitness Trainer</.link>
+      </li>
+    </ul>
   </div>
 </div>

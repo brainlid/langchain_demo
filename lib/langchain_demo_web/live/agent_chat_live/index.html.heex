@@ -1,0 +1,88 @@
+<main>
+  <div class="hidden">
+    <div class="mb-10 pt-4 pb-4 border-b border-t border-gray-200 xl:pt-6 xl:border-t-0">
+      <div class="flex items-center">
+        <h1 class="flex-1 text-lg font-medium">Behind the Scenes Data Peek</h1>
+      </div>
+    </div>
+
+    <div class="relative z-0 divide-y divide-gray-200 border-b border-gray-200">
+      <.table id="current-user" rows={[:name, :age, :gender, :why, :fitness_experience, :goals, :resources, :limitations, :overall_fitness_plan, :fitness_plan_for_week, :notes]}>
+        <:col :let={field} label="Field"><%= Atom.to_string(field) %></:col>
+        <:col :let={field} label="Value"><%= Map.get(@current_user, field) %></:col>
+      </.table>
+    </div>
+  </div>
+
+  <div class="py-4 border-b border-t border-gray-200 xl:pt-6 xl:border-t-0">
+    <div class="flex items-center">
+      <h1 class="flex-1 text-lg font-medium">Personal Trainer Chat</h1>
+    </div>
+  </div>
+  <ul role="list" class="relative z-0 divide-y divide-gray-200 border-b border-gray-200">
+    <%= for message <- @display_messages do %>
+      <li :if={message.role == :function_call} class="relative pl-4 pr-6 py-2 bg-gray-100 hover:bg-gray-200 sm:pl-6 lg:pl-8 xl:pl-6">
+        <div class="flex items-center space-x-4">
+          <div class="shrink-0 w-8">
+            <div class="text-center">
+              <.icon_for_role role={message.role} />
+            </div>
+          </div>
+          <div class="min-w-0 flex-auto">
+            <span class="whitespace-pre-wrap">
+              <%= message.content %>
+            </span>
+          </div>
+        </div>
+      </li>
+      <li :if={message.role != :function_call} class="relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:py-6 sm:pl-6 lg:pl-8 xl:pl-6">
+        <div class="flex items-center space-x-4">
+          <div class="shrink-0 w-8">
+            <div class="text-center">
+              <.icon_for_role role={message.role} />
+            </div>
+          </div>
+          <div class="min-w-0 flex-auto">
+            <.markdown :if={message.role == :assistant} text={message.content} />
+            <span :if={message.role != :assistant} class="whitespace-pre-wrap">
+              <%= message.content %>
+            </span>
+          </div>
+        </div>
+      </li>
+    <% end %>
+    <%= if @llm_chain.delta do %>
+      <li class="relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:py-6 sm:pl-6 lg:pl-8 xl:pl-6">
+        <div class="flex items-center space-x-4">
+          <div class="shrink-0 w-8">
+            <div class="text-center">
+              <img src={~p"/images/typing-animation.gif"} class="w-12" />
+            </div>
+          </div>
+          <div class="min-w-0 flex-auto">
+            <.markdown :if={@llm_chain.delta.role == :assistant} text={@llm_chain.delta.content} />
+            <span :if={@llm_chain.delta.role != :assistant} class="whitespace-pre-wrap">
+              <%= @llm_chain.delta.content %>
+            </span>
+          </div>
+        </div>
+      </li>
+    <% end %>
+  </ul>
+  <div>
+    <.simple_form for={@form} id="new-message-form" phx-change="validate" phx-submit="save">
+      <.input
+        field={@form[:content]}
+        id="new-message-content"
+        type="textarea"
+        rows={8}
+        label="Send Message"
+        phx-debounce="500"
+        phx-hook="CtrlEnterSubmits"
+      />
+      <:actions>
+        <.button phx-disable-with="Submiting...">Submit</.button>
+      </:actions>
+    </.simple_form>
+  </div>
+</main>

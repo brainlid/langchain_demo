@@ -26,6 +26,8 @@ defmodule LangChainDemoWeb.Router do
     live "/conversations/:id", ConversationLive.Show, :show
     live "/conversations/:id/show/edit", ConversationLive.Show, :edit
     live "/conversations/:id/edit_message/:msg_id", ConversationLive.Show, :edit_message
+
+    live "/agent_chat/", AgentChatLive.Index, :index
   end
 
   # Other scopes may use custom stacks.

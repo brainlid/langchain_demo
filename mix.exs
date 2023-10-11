@@ -45,7 +45,7 @@ defmodule LangChainDemo.MixProject do
       {:tailwind, "~> 0.2.0", runtime: Mix.env() == :dev},
       {:swoosh, "~> 1.3"},
       # {:finch, "~> 0.16"},
-      {:langchain, "~> 0.1.0"},
+      {:langchain, "~> 0.1.1"},
       {:finch, github: "sneako/finch", override: true},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
