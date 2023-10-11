@@ -7,8 +7,8 @@ defmodule LangChainDemo.FitnessLogsFixtures do
   @doc """
   Generate a fitness_log.
   """
-  def fitness_log_fixture(attrs \\ %{}) do
-    {:ok, fitness_log} =
+  def fitness_log_fixture(user_id, attrs \\ %{}) do
+    values =
       attrs
       |> Enum.into(%{
         activity: "some activity",
@@ -16,7 +16,8 @@ defmodule LangChainDemo.FitnessLogsFixtures do
         date: ~D[2023-10-06],
         units: "some units"
       })
-      |> LangChainDemo.FitnessLogs.create_fitness_log()
+
+    {:ok, fitness_log} = LangChainDemo.FitnessLogs.create_fitness_log(user_id, values)
 
     fitness_log
   end

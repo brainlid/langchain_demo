@@ -8,7 +8,7 @@ defmodule LangChainDemo.FitnessUsersTest do
 
     import LangChainDemo.FitnessUsersFixtures
 
-    @invalid_attrs %{age: nil, current_fitness_plan: nil, fitness_experience: nil, gender: nil, goals: nil, name: nil, resources: nil, why: nil}
+    @invalid_attrs %{age: "not a number", overall_fitness_plan: nil, fitness_experience: "invalid", gender: nil, goals: nil, name: nil, resources: nil, why: nil}
 
     test "list_fitness_users/0 returns all fitness_users" do
       fitness_user = fitness_user_fixture()
@@ -21,12 +21,12 @@ defmodule LangChainDemo.FitnessUsersTest do
     end
 
     test "create_fitness_user/1 with valid data creates a fitness_user" do
-      valid_attrs = %{age: 42, current_fitness_plan: "some current_fitness_plan", fitness_experience: "some fitness_experience", gender: "some gender", goals: "some goals", name: "some name", resources: "some resources", why: "some why"}
+      valid_attrs = %{age: 42, overall_fitness_plan: "some overall_fitness_plan", fitness_experience: :intermediate, gender: "some gender", goals: "some goals", name: "some name", resources: "some resources", why: "some why"}
 
       assert {:ok, %FitnessUser{} = fitness_user} = FitnessUsers.create_fitness_user(valid_attrs)
       assert fitness_user.age == 42
-      assert fitness_user.current_fitness_plan == "some current_fitness_plan"
-      assert fitness_user.fitness_experience == "some fitness_experience"
+      assert fitness_user.overall_fitness_plan == "some overall_fitness_plan"
+      assert fitness_user.fitness_experience == :intermediate
       assert fitness_user.gender == "some gender"
       assert fitness_user.goals == "some goals"
       assert fitness_user.name == "some name"
@@ -40,12 +40,12 @@ defmodule LangChainDemo.FitnessUsersTest do
 
     test "update_fitness_user/2 with valid data updates the fitness_user" do
       fitness_user = fitness_user_fixture()
-      update_attrs = %{age: 43, current_fitness_plan: "some updated current_fitness_plan", fitness_experience: "some updated fitness_experience", gender: "some updated gender", goals: "some updated goals", name: "some updated name", resources: "some updated resources", why: "some updated why"}
+      update_attrs = %{age: 43, overall_fitness_plan: "some updated overall_fitness_plan", fitness_experience: "advanced", gender: "some updated gender", goals: "some updated goals", name: "some updated name", resources: "some updated resources", why: "some updated why"}
 
       assert {:ok, %FitnessUser{} = fitness_user} = FitnessUsers.update_fitness_user(fitness_user, update_attrs)
       assert fitness_user.age == 43
-      assert fitness_user.current_fitness_plan == "some updated current_fitness_plan"
-      assert fitness_user.fitness_experience == "some updated fitness_experience"
+      assert fitness_user.overall_fitness_plan == "some updated overall_fitness_plan"
+      assert fitness_user.fitness_experience == :advanced
       assert fitness_user.gender == "some updated gender"
       assert fitness_user.goals == "some updated goals"
       assert fitness_user.name == "some updated name"

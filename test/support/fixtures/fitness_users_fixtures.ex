@@ -12,12 +12,12 @@ defmodule LangChainDemo.FitnessUsersFixtures do
       attrs
       |> Enum.into(%{
         age: 42,
-        current_fitness_plan: "some current_fitness_plan",
-        fitness_experience: "some fitness_experience",
-        gender: "some gender",
-        goals: "some goals",
-        name: "some name",
-        resources: "some resources",
+        overall_fitness_plan: nil,
+        fitness_experience: :beginner,
+        gender: "male",
+        goals: nil,
+        name: nil,
+        resources: nil,
         why: "some why"
       })
       |> LangChainDemo.FitnessUsers.create_fitness_user()
