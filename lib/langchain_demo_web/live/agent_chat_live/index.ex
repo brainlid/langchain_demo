@@ -59,8 +59,9 @@ defmodule LangChainDemoWeb.AgentChatLive.Index do
       case ChatMessage.new(params) do
         {:ok, %ChatMessage{} = message} ->
           socket
-          |> submit_message(Message.new_user!(message.content))
+          |> add_user_message(message.content)
           |> reset_chat_message_form()
+          |> run_chain()
 
         {:error, changeset} ->
           assign_form(socket, changeset)
@@ -90,12 +91,22 @@ defmodule LangChainDemoWeb.AgentChatLive.Index do
 
   @impl true
   def handle_info({:chat_response, %LangChain.MessageDelta{} = delta}, socket) do
+    # apply the delta message to our tracked LLMChain. If it completes the
+    # message, optionally display the message
     updated_chain = LLMChain.apply_delta(socket.assigns.llm_chain, delta)
-    # if this completed the delta and it's not a message, create the message
+    # if this completed the delta, create the message and track on the chain
     socket =
       if updated_chain.delta == nil do
-        {:ok, message} = Message.new(Map.from_struct(updated_chain.last_message))
-        append_message(socket, message)
+        case updated_chain.last_message do
+          # Messages that only execute a function have no content. Don't display if no content.
+          %Message{role: role, content: content}
+          when role in [:user, :assistant] and is_binary(content) ->
+            append_display_message(socket, %ChatMessage{role: role, content: content})
+
+          # otherwise, not a message for display
+          _other ->
+            socket
+        end
       else
         socket
       end
@@ -117,23 +128,19 @@ defmodule LangChainDemoWeb.AgentChatLive.Index do
         :llm_chain,
         LLMChain.update_custom_context(socket.assigns.llm_chain, %{current_user: updated_user})
       )
-      |> assign(:display_messages, socket.assigns.display_messages ++ [message])
+      |> append_display_message(message)
 
     {:noreply, socket}
   end
 
   def handle_info({:function_run, message}, socket) do
-    message = %ChatMessage{
+    display = %ChatMessage{
       role: :function_call,
       hidden: false,
       content: message
     }
 
-    socket =
-      socket
-      |> assign(:display_messages, socket.assigns.display_messages ++ [message])
-
-    {:noreply, socket}
+    {:noreply, append_display_message(socket, display)}
   end
 
   def handle_info({:task_error, reason}, socket) do
@@ -180,26 +187,54 @@ defmodule LangChainDemoWeb.AgentChatLive.Index do
     assign(socket, :form, to_form(changeset))
   end
 
-  def submit_message(socket, %Message{} = message) do
+  # if this is the FIRST user message, use a prompt template to include some
+  # initial hidden instructions.
+  def add_user_message(
+        %{assigns: %{llm_chain: %LLMChain{last_message: %Message{role: :system}} = llm_chain}} =
+          socket,
+        user_text
+      )
+      when is_binary(user_text) do
+    today = DateTime.now!(socket.assigns.current_user.timezone)
+
+    current_user_template =
+      PromptTemplate.from_template!(~S|
+Today is <%= @today %>
+
+User's currently known information in JSON format:
+<%= @current_user_json %>
+
+Do an accountability follow-up with me on my previous workouts. When no previous workout information is available, help me get started.
+
+User says:
+<%= @user_text %>|)
+
+    updated_chain =
+      llm_chain
+      |> LLMChain.add_message(
+        PromptTemplate.to_message!(current_user_template, %{
+          current_user_json: FitnessUser.for_json(socket.assigns.current_user) |> Jason.encode!(),
+          today: today |> Calendar.strftime("%A, %Y/%m/%d"),
+          user_text: user_text
+        })
+      )
+
     socket
-    |> append_message(message)
-    |> run_chain()
+    |> assign(llm_chain: updated_chain)
+    # display what the user said, but not what we sent.
+    |> append_display_message(%ChatMessage{role: :user, content: user_text})
+  end
+
+  def add_user_message(socket, user_text) when is_binary(user_text) do
+    # NOT the first message. Submit the user's text as-is.
+    updated_chain = LLMChain.add_message(socket.assigns.llm_chain, Message.new_user!(user_text))
+
+    socket
+    |> assign(llm_chain: updated_chain)
+    |> append_display_message(%ChatMessage{role: :user, content: user_text})
   end
 
   defp assign_llm_chain(socket) do
-    date = DateTime.utc_now()
-
-    current_user_template =
-      PromptTemplate.from_template!(
-        ~S|
-Today is <%= @date %>
-
-The user's currently known information in JSON format:
-<%= @current_user_json %>
-
-Do an accountability follow-up with me on my previous workouts. When there is no previous workout information, help me get started.|
-      )
-
     llm_chain =
       LLMChain.new!(%{
         llm:
@@ -249,12 +284,6 @@ Format for weekly fitness plan:
 Before modifying the user's training program, summarize the change and confirm it is what they want.|
         )
       )
-      |> LLMChain.add_message(
-        PromptTemplate.to_message!(current_user_template, %{
-          current_user_json: FitnessUser.for_json(socket.assigns.current_user) |> Jason.encode!(),
-          date: date |> Calendar.strftime("%A, %Y/%m/%d")
-        })
-      )
 
     socket
     |> assign(:llm_chain, llm_chain)
@@ -294,23 +323,8 @@ Before modifying the user's training program, summarize the change and confirm i
     assign_form(socket, changeset)
   end
 
-  defp append_message(socket, %Message{} = llm_message) do
-    llm_chain =
-      socket.assigns.llm_chain
-      |> LLMChain.add_message(llm_message)
-
-    socket = assign(socket, :llm_chain, llm_chain)
-
-    case llm_message do
-      # Messages that only execute a function have no content. Don't display if no content.
-      %Message{role: role, content: content} = msg
-      when role in [:user, :assistant] and is_binary(content) ->
-        assign(socket, :display_messages, socket.assigns.display_messages ++ [msg])
-
-      # not a message for display
-      _other ->
-        socket
-    end
+  defp append_display_message(socket, %ChatMessage{} = message) do
+    assign(socket, :display_messages, socket.assigns.display_messages ++ [message])
   end
 
   attr(:role, :atom, required: true)
