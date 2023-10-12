@@ -69,6 +69,25 @@ defmodule LangChainDemoWeb.AgentChatLive.Index do
     {:noreply, socket}
   end
 
+  # Browser hook sent up the user's timezone.
+  def handle_event("browser-timezone", %{"timezone" => timezone}, socket) do
+    # check user's settings. If timezone is different from settings, update it
+    # on the user.
+    user = socket.assigns.current_user
+
+    socket =
+      if timezone != user.timezone do
+        {:ok, updated_user} = FitnessUsers.update_fitness_user(user, %{timezone: timezone})
+
+        socket
+        |> assign(:current_user, updated_user)
+      else
+        socket
+      end
+
+    {:noreply, socket}
+  end
+
   @impl true
   def handle_info({:chat_response, %LangChain.MessageDelta{} = delta}, socket) do
     updated_chain = LLMChain.apply_delta(socket.assigns.llm_chain, delta)

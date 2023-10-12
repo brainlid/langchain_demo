@@ -23,9 +23,11 @@ import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 
 import * as CtrlEnterSubmits from "./hooks/ctrl_enter_submits"
+import * as BrowserTimezone from "./hooks/browser_timezone"
 
 let Hooks = Object.assign({},
   CtrlEnterSubmits.hooks,
+  BrowserTimezone.hooks,
 )
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")

@@ -16,6 +16,7 @@ defmodule LangChainDemo.FitnessUsers.FitnessUser do
     field :limitations, :string
     field :notes, :string
     field :fitness_plan_for_week, :string
+    field :timezone, :string
 
     timestamps()
 
@@ -37,6 +38,7 @@ defmodule LangChainDemo.FitnessUsers.FitnessUser do
       :limitations,
       :notes,
       :fitness_plan_for_week,
+      :timezone
     ])
     |> validate_required([])
   end
@@ -53,7 +55,8 @@ defmodule LangChainDemo.FitnessUsers.FitnessUser do
       why: user.why,
       limitations: user.limitations,
       notes: user.notes,
-      fitness_plan_for_week: user.fitness_plan_for_week
+      fitness_plan_for_week: user.fitness_plan_for_week,
+      timezone: user.timezone
     }
   end
 end
