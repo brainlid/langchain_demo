@@ -7,7 +7,7 @@
     </div>
 
     <div class="relative z-0 divide-y divide-gray-200 border-b border-gray-200">
-      <.table id="current-user" rows={[:name, :age, :gender, :why, :fitness_experience, :goals, :resources, :limitations, :overall_fitness_plan, :fitness_plan_for_week, :notes]}>
+      <.table id="current-user" rows={[:name, :age, :gender, :timezone, :why, :fitness_experience, :goals, :resources, :limitations, :overall_fitness_plan, :fitness_plan_for_week, :notes]}>
         <:col :let={field} label="Field"><%= Atom.to_string(field) %></:col>
         <:col :let={field} label="Value"><%= Map.get(@current_user, field) %></:col>
       </.table>
