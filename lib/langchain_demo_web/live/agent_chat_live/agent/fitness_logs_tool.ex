@@ -73,7 +73,6 @@ defmodule LangChainDemoWeb.AgentChatLive.Agent.FitnessLogsTool do
     |> FitnessLogs.list_fitness_logs(filters)
     |> Enum.map(&FitnessLog.for_json/1)
     |> Jason.encode!()
-    |> dbg()
   end
 
   @doc """
