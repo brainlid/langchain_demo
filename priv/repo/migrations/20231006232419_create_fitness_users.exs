@@ -14,6 +14,7 @@ defmodule LangChainDemo.Repo.Migrations.CreateFitnessUsers do
       add :fitness_plan_for_week, :string
       add :limitations, :string
       add :notes, :string
+      add :timezone, :string
 
       timestamps()
     end
