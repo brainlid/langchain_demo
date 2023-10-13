@@ -1,9 +1,23 @@
 defmodule LangChainDemo.FitnessUsers.FitnessUser do
   use Ecto.Schema
   import Ecto.Changeset
-  alias __MODULE__
   alias LangChainDemo.FitnessLogs.FitnessLog
 
+  @derive {Jason.Encoder,
+           only: [
+             :age,
+             :overall_fitness_plan,
+             :fitness_experience,
+             :gender,
+             :goals,
+             :name,
+             :resources,
+             :why,
+             :limitations,
+             :notes,
+             :fitness_plan_for_week,
+             :timezone
+           ]}
   schema "fitness_users" do
     field :age, :integer
     field :overall_fitness_plan, :string
@@ -41,22 +55,5 @@ defmodule LangChainDemo.FitnessUsers.FitnessUser do
       :timezone
     ])
     |> validate_required([])
-  end
-
-  def for_json(%FitnessUser{} = user) do
-    %{
-      age: user.age,
-      overall_fitness_plan: user.overall_fitness_plan,
-      fitness_experience: user.fitness_experience,
-      gender: user.gender,
-      goals: user.goals,
-      name: user.name,
-      resources: user.resources,
-      why: user.why,
-      limitations: user.limitations,
-      notes: user.notes,
-      fitness_plan_for_week: user.fitness_plan_for_week,
-      timezone: user.timezone
-    }
   end
 end

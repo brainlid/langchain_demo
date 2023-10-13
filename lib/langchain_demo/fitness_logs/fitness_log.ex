@@ -4,6 +4,7 @@ defmodule LangChainDemo.FitnessLogs.FitnessLog do
   alias LangChainDemo.FitnessUsers.FitnessUser
   alias __MODULE__
 
+  @derive {Jason.Encoder, only: [:activity, :amount, :date, :units, :notes]}
   schema "fitness_logs" do
     field :activity, :string
     field :amount, :integer
@@ -38,17 +39,5 @@ defmodule LangChainDemo.FitnessLogs.FitnessLog do
   defp common_validations(changeset) do
     changeset
     |> validate_required(@required_fields)
-  end
-
-  def for_json(%FitnessLog{} = log) do
-    %{
-      # be more explicit with what this is for the LLM
-      fitness_log_id: log.id,
-      activity: log.activity,
-      amount: log.amount,
-      date: log.date,
-      units: log.units,
-      notes: log.notes
-    }
   end
 end

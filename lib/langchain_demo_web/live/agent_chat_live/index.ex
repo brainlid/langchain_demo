@@ -11,6 +11,7 @@ defmodule LangChainDemoWeb.AgentChatLive.Index do
   alias LangChainDemoWeb.AgentChatLive.Agent.FitnessLogsTool
   alias LangChainDemo.FitnessUsers
   alias LangChainDemo.FitnessUsers.FitnessUser
+  alias LangChainDemo.FitnessLogs
 
   @impl true
   def mount(_params, _session, socket) do
@@ -195,16 +196,20 @@ defmodule LangChainDemoWeb.AgentChatLive.Index do
         user_text
       )
       when is_binary(user_text) do
-    today = DateTime.now!(socket.assigns.current_user.timezone)
+    current_user = socket.assigns.current_user
+    today = DateTime.now!(current_user.timezone)
 
     current_user_template =
       PromptTemplate.from_template!(~S|
 Today is <%= @today %>
 
-User's currently known information in JSON format:
+User's currently known account information in JSON format:
 <%= @current_user_json %>
 
 Do an accountability follow-up with me on my previous workouts. When no previous workout information is available, help me get started.
+
+Today's workout information in JSON format:
+<%= @current_workout_json %>
 
 User says:
 <%= @user_text %>|)
@@ -213,7 +218,8 @@ User says:
       llm_chain
       |> LLMChain.add_message(
         PromptTemplate.to_message!(current_user_template, %{
-          current_user_json: FitnessUser.for_json(socket.assigns.current_user) |> Jason.encode!(),
+          current_user_json: current_user |> Jason.encode!(),
+          current_workout_json: FitnessLogs.list_fitness_logs(current_user.id, days: 0) |> Jason.encode!(),
           today: today |> Calendar.strftime("%A, %Y/%m/%d"),
           user_text: user_text
         })
