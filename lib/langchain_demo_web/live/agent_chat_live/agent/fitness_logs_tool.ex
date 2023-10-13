@@ -103,7 +103,7 @@ defmodule LangChainDemoWeb.AgentChatLive.Agent.FitnessLogsTool do
           },
           units: %{
             type: "string",
-            description: "Single word units for the amount. Ex: lbs, minutes, miles, count."
+            description: "One word unit for the amount. Ex: lbs, minutes, miles, count."
           },
           notes: %{
             type: "string",
