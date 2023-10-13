@@ -97,13 +97,13 @@ defmodule LangChainDemoWeb.AgentChatLive.Agent.FitnessLogsTool do
               "The name of the activity. Ex: Running, Elliptical, Bench Press, Push Ups, Bent-Over Rows, etc."
           },
           amount: %{
-            type: "string",
+            type: "integer",
             description:
               "Either the duration in time, a distance traveled, the number of times an activity was performed (like push-ups), or the weight used (like \"25\" for 25 lbs)."
           },
           units: %{
             type: "string",
-            description: "The units for the amount. Ex: minutes, miles, count, lbs."
+            description: "The units for the amount. Ex: lbs, minutes, miles, count."
           },
           notes: %{
             type: "string",
