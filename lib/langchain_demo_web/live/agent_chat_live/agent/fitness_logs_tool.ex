@@ -5,7 +5,6 @@ defmodule LangChainDemoWeb.AgentChatLive.Agent.FitnessLogsTool do
   require Logger
   alias LangChain.Function
   alias LangChainDemo.FitnessLogs
-  alias LangChainDemo.FitnessLogs.FitnessLog
 
   @doc """
   Return the functions used for operating on a user's FitnessLogs.

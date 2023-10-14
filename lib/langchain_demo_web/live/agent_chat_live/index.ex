@@ -10,7 +10,6 @@ defmodule LangChainDemoWeb.AgentChatLive.Index do
   alias LangChainDemoWeb.AgentChatLive.Agent.UpdateCurrentUserFunction
   alias LangChainDemoWeb.AgentChatLive.Agent.FitnessLogsTool
   alias LangChainDemo.FitnessUsers
-  alias LangChainDemo.FitnessUsers.FitnessUser
   alias LangChainDemo.FitnessLogs
 
   @impl true
