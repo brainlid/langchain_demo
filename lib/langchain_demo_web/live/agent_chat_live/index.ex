@@ -189,7 +189,8 @@ defmodule LangChainDemoWeb.AgentChatLive.Index do
   end
 
   # if this is the FIRST user message, use a prompt template to include some
-  # initial hidden instructions.
+  # initial hidden instructions. We detect if it's the first by matching on the
+  # last_messaging being the "system" message.
   def add_user_message(
         %{assigns: %{llm_chain: %LLMChain{last_message: %Message{role: :system}} = llm_chain}} =
           socket,
