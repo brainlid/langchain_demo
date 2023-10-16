@@ -25,9 +25,17 @@ Features:
 
 ## Personal Fitness AI Agent
 
+An [Agent](https://python.langchain.com/docs/modules/agents/) can be described as:
+
+> **Agent**: a language model is used as a reasoning engine to determine which actions to take and in which order.
+
 Visit the [Personal Fitness Trainer](http://localhost:4004/agent_chat) page to meet with your own Personal AI Fitness Trainer.
 
-Ask "how do we start?" to get started and go from there!
+Suggestion: Ask "how do we start?" to get started and go from there!
+
+For an overview and to see it in action, check out the video:
+
+![Youtube video of the fitness trainer](https://www.youtube.com/watch?v=AsfQNtoaB1M)
 
 You can schedule a weekly workout to help you reach your goals. Information about you is stored to a local SQLite database. Report on your workouts and your assistant will log them for you. The assistant can access your stored information and historical logs to answer questions and help you on your personal fitness journey! 💪
 
@@ -36,6 +44,3 @@ Features:
 - Data about the user is written in a structured format by the AI into a local SQLite database.
 - Historical fitness log entries are stored and fetched from the local database.
 - Provides a simple but powerful working example of how to create an AI agent in Elixir that integrates with your app.
-
-See a demo of it:
-VIDEO
