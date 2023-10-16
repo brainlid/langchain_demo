@@ -37,7 +37,7 @@ For an overview and to see it in action, check out the video:
 
 [![Youtube demo video](./YoutubeLinkImage.png)](https://www.youtube.com/watch?v=AsfQNtoaB1M)
 
-You can schedule a weekly workout to help you reach your goals. Information about you is stored to a local SQLite database. Report on your workouts and your assistant will log them for you. The assistant can access your stored information and historical logs to answer questions and help you on your personal fitness journey! 💪
+You can create a weekly workout plan to help you reach your goals. Information about you is stored in a local SQLite database. Report on your workouts to your assistant and they will log them for you. The assistant can access your stored information and historical workout logs to answer questions and help you on your personal fitness journey! 💪
 
 Features:
 - Context around how the AI is configured is hidden from the user.
