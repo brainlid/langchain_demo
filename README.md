@@ -35,7 +35,7 @@ Suggestion: Ask "how do we start?" to get started and go from there!
 
 For an overview and to see it in action, check out the video:
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/AsfQNtoaB1M?si=3rifakqrFGbQh8iz" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+[![Youtube demo video](https://www.youtube.com/watch?v=AsfQNtoaB1M)](https://www.youtube.com/watch?v=AsfQNtoaB1M)
 
 You can schedule a weekly workout to help you reach your goals. Information about you is stored to a local SQLite database. Report on your workouts and your assistant will log them for you. The assistant can access your stored information and historical logs to answer questions and help you on your personal fitness journey! 💪
 
