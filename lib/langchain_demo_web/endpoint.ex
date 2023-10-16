@@ -1,4 +1,4 @@
-defmodule LangchainDemoWeb.Endpoint do
+defmodule LangChainDemoWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :langchain_demo
 
   # The session will be stored in the cookie and signed,
@@ -21,7 +21,7 @@ defmodule LangchainDemoWeb.Endpoint do
     at: "/",
     from: :langchain_demo,
     gzip: false,
-    only: LangchainDemoWeb.static_paths()
+    only: LangChainDemoWeb.static_paths()
 
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.
@@ -47,5 +47,5 @@ defmodule LangchainDemoWeb.Endpoint do
   plug Plug.MethodOverride
   plug Plug.Head
   plug Plug.Session, @session_options
-  plug LangchainDemoWeb.Router
+  plug LangChainDemoWeb.Router
 end

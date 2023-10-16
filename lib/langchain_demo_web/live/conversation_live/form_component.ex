@@ -1,9 +1,9 @@
-defmodule LangchainDemoWeb.ConversationLive.FormComponent do
-  use LangchainDemoWeb, :live_component
+defmodule LangChainDemoWeb.ConversationLive.FormComponent do
+  use LangChainDemoWeb, :live_component
 
-  alias LangchainDemo.Conversations
-  alias LangchainDemo.Conversations.Conversation
-  alias LangchainDemo.Messages
+  alias LangChainDemo.Conversations
+  alias LangChainDemo.Conversations.Conversation
+  alias LangChainDemo.Messages
 
   @impl true
   def render(assigns) do

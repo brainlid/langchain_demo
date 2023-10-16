@@ -1,4 +1,4 @@
-defmodule LangchainDemo.Messages.Message do
+defmodule LangChainDemo.Messages.Message do
   use Ecto.Schema
   import Ecto.Changeset
   alias __MODULE__
@@ -13,7 +13,7 @@ defmodule LangchainDemo.Messages.Message do
 
     field :status, Ecto.Enum, values: [:complete, :length, :cancelled], default: nil
 
-    belongs_to(:conversation, LangchainDemo.Conversations.Conversation)
+    belongs_to(:conversation, LangChainDemo.Conversations.Conversation)
 
     timestamps()
   end

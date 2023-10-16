@@ -1,12 +1,12 @@
-defmodule LangchainDemoWeb do
+defmodule LangChainDemoWeb do
   @moduledoc """
   The entrypoint for defining your web interface, such
   as controllers, components, channels, and so on.
 
   This can be used in your application as:
 
-      use LangchainDemoWeb, :controller
-      use LangchainDemoWeb, :html
+      use LangChainDemoWeb, :controller
+      use LangChainDemoWeb, :html
 
   The definitions below will be executed for every controller,
   component, etc, so keep them short and clean, focused
@@ -40,10 +40,10 @@ defmodule LangchainDemoWeb do
     quote do
       use Phoenix.Controller,
         formats: [:html, :json],
-        layouts: [html: LangchainDemoWeb.Layouts]
+        layouts: [html: LangChainDemoWeb.Layouts]
 
       import Plug.Conn
-      import LangchainDemoWeb.Gettext
+      import LangChainDemoWeb.Gettext
 
       unquote(verified_routes())
     end
@@ -52,7 +52,7 @@ defmodule LangchainDemoWeb do
   def live_view do
     quote do
       use Phoenix.LiveView,
-        layout: {LangchainDemoWeb.Layouts, :app}
+        layout: {LangChainDemoWeb.Layouts, :app}
 
       unquote(html_helpers())
     end
@@ -84,8 +84,8 @@ defmodule LangchainDemoWeb do
       # HTML escaping functionality
       import Phoenix.HTML
       # Core UI components and translation
-      import LangchainDemoWeb.CoreComponents
-      import LangchainDemoWeb.Gettext
+      import LangChainDemoWeb.CoreComponents
+      import LangChainDemoWeb.Gettext
 
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS
@@ -98,9 +98,9 @@ defmodule LangchainDemoWeb do
   def verified_routes do
     quote do
       use Phoenix.VerifiedRoutes,
-        endpoint: LangchainDemoWeb.Endpoint,
-        router: LangchainDemoWeb.Router,
-        statics: LangchainDemoWeb.static_paths()
+        endpoint: LangChainDemoWeb.Endpoint,
+        router: LangChainDemoWeb.Router,
+        statics: LangChainDemoWeb.static_paths()
     end
   end
 

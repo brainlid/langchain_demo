@@ -1,4 +1,4 @@
-defmodule LangchainDemoWeb.CoreComponents do
+defmodule LangChainDemoWeb.CoreComponents do
   @moduledoc """
   Provides core UI components.
 
@@ -17,7 +17,7 @@ defmodule LangchainDemoWeb.CoreComponents do
   use Phoenix.Component
 
   alias Phoenix.LiveView.JS
-  import LangchainDemoWeb.Gettext
+  import LangChainDemoWeb.Gettext
 
   @doc """
   Renders a modal.
@@ -741,9 +741,9 @@ defmodule LangchainDemoWeb.CoreComponents do
     # with our gettext backend as first argument. Translations are
     # available in the errors.po file (as we use the "errors" domain).
     if count = opts[:count] do
-      Gettext.dngettext(LangchainDemoWeb.Gettext, "errors", msg, msg, count, opts)
+      Gettext.dngettext(LangChainDemoWeb.Gettext, "errors", msg, msg, count, opts)
     else
-      Gettext.dgettext(LangchainDemoWeb.Gettext, "errors", msg, opts)
+      Gettext.dgettext(LangChainDemoWeb.Gettext, "errors", msg, opts)
     end
   end
 
@@ -824,45 +824,5 @@ defmodule LangchainDemoWeb.CoreComponents do
       <% end %>
     </div>
     """
-  end
-
-  @doc """
-  Render a simple filter form input.
-  """
-  attr :rest, :global
-
-  def simple_filter_form(assigns) do
-    ~H"""
-    <form phx-change="simple-filter" phx-submit="simple-filter" {@rest}>
-      <input
-        type="text"
-        name="filter"
-        id="filter"
-        phx-debounce="500"
-        class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 px-4 rounded-full"
-        placeholder="Filter"
-      />
-    </form>
-    """
-  end
-
-  @doc """
-  Apply the filtering value from Simple Filter input form. This dynamically
-  filters an in-memory list of maps. The value is partially matched with a
-  case-insensitive search against each item in the list by that specified
-  attribute.
-
-      simple_filter_apply(Conversations.all_contexts(), value, :name
-
-  """
-  def simple_filter_apply(full_list, "", _match_attribute), do: full_list
-
-  def simple_filter_apply(full_list, filter_value, match_attribute) do
-    match_value = filter_value |> String.trim() |> String.downcase()
-
-    Enum.filter(full_list, fn item ->
-      item_val = Map.get(item, match_attribute) |> String.downcase()
-      String.contains?(item_val, match_value)
-    end)
   end
 end

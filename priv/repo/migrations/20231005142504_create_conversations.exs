@@ -1,4 +1,4 @@
-defmodule LangchainDemo.Repo.Migrations.CreateConversations do
+defmodule LangChainDemo.Repo.Migrations.CreateConversations do
   use Ecto.Migration
 
   def change do

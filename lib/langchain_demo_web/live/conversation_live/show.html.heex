@@ -106,7 +106,7 @@
   on_cancel={JS.patch(~p"/conversations/#{@conversation}")}
 >
   <.live_component
-    module={LangchainDemoWeb.ConversationLive.FormComponent}
+    module={LangChainDemoWeb.ConversationLive.FormComponent}
     id={@conversation.id}
     title={@page_title}
     action={@live_action}
@@ -123,7 +123,7 @@
   on_click_away={:none}
 >
   <.live_component
-    module={LangchainDemoWeb.ConversationLive.MessageFormComponent}
+    module={LangChainDemoWeb.ConversationLive.MessageFormComponent}
     id={"msg-modal-#{@message.id}"}
     title={@page_title}
     action={@live_action}

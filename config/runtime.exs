@@ -17,7 +17,7 @@ import Config
 # Alternatively, you can use `mix phx.gen.release` to generate a `bin/server`
 # script that automatically sets the env var above.
 if System.get_env("PHX_SERVER") do
-  config :langchain_demo, LangchainDemoWeb.Endpoint, server: true
+  config :langchain_demo, LangChainDemoWeb.Endpoint, server: true
 end
 
 if config_env() == :prod do
@@ -28,7 +28,7 @@ if config_env() == :prod do
       For example: /etc/langchain_demo/langchain_demo.db
       """
 
-  config :langchain_demo, LangchainDemo.Repo,
+  config :langchain_demo, LangChainDemo.Repo,
     database: database_path,
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "5")
 
@@ -47,7 +47,7 @@ if config_env() == :prod do
   host = System.get_env("PHX_HOST") || "example.com"
   port = String.to_integer(System.get_env("PORT") || "4000")
 
-  config :langchain_demo, LangchainDemoWeb.Endpoint,
+  config :langchain_demo, LangChainDemoWeb.Endpoint,
     url: [host: host, port: 443, scheme: "https"],
     http: [
       # Enable IPv6 and bind on all interfaces.
@@ -64,7 +64,7 @@ if config_env() == :prod do
   # To get SSL working, you will need to add the `https` key
   # to your endpoint configuration:
   #
-  #     config :langchain_demo, LangchainDemoWeb.Endpoint,
+  #     config :langchain_demo, LangChainDemoWeb.Endpoint,
   #       https: [
   #         ...,
   #         port: 443,
@@ -86,7 +86,7 @@ if config_env() == :prod do
   # We also recommend setting `force_ssl` in your endpoint, ensuring
   # no data is ever sent via http, always redirecting to https:
   #
-  #     config :langchain_demo, LangchainDemoWeb.Endpoint,
+  #     config :langchain_demo, LangChainDemoWeb.Endpoint,
   #       force_ssl: [hsts: true]
   #
   # Check `Plug.SSL` for all available options in `force_ssl`.
@@ -97,7 +97,7 @@ if config_env() == :prod do
   # Also, you may need to configure the Swoosh API client of your choice if you
   # are not using SMTP. Here is an example of the configuration:
   #
-  #     config :langchain_demo, LangchainDemo.Mailer,
+  #     config :langchain_demo, LangChainDemo.Mailer,
   #       adapter: Swoosh.Adapters.Mailgun,
   #       api_key: System.get_env("MAILGUN_API_KEY"),
   #       domain: System.get_env("MAILGUN_DOMAIN")

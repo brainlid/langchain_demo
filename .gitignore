@@ -42,3 +42,5 @@ npm-debug.log
 *.db
 *.db-*
 
+/video_assets/
+

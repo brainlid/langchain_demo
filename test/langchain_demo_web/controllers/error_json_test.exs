@@ -1,12 +1,12 @@
-defmodule LangchainDemoWeb.ErrorJSONTest do
-  use LangchainDemoWeb.ConnCase, async: true
+defmodule LangChainDemoWeb.ErrorJSONTest do
+  use LangChainDemoWeb.ConnCase, async: true
 
   test "renders 404" do
-    assert LangchainDemoWeb.ErrorJSON.render("404.json", %{}) == %{errors: %{detail: "Not Found"}}
+    assert LangChainDemoWeb.ErrorJSON.render("404.json", %{}) == %{errors: %{detail: "Not Found"}}
   end
 
   test "renders 500" do
-    assert LangchainDemoWeb.ErrorJSON.render("500.json", %{}) ==
+    assert LangChainDemoWeb.ErrorJSON.render("500.json", %{}) ==
              %{errors: %{detail: "Internal Server Error"}}
   end
 end
