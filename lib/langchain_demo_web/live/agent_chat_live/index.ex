@@ -220,7 +220,7 @@ User says:
         PromptTemplate.to_message!(current_user_template, %{
           current_user_json: current_user |> Jason.encode!(),
           current_workout_json: FitnessLogs.list_fitness_logs(current_user.id, days: 0) |> Jason.encode!(),
-          today: today |> Calendar.strftime("%A, %Y/%m/%d"),
+          today: today |> Calendar.strftime("%A, %Y-%m-%d"),
           user_text: user_text
         })
       )
