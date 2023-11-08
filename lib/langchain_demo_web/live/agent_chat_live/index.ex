@@ -245,7 +245,7 @@ User says:
       LLMChain.new!(%{
         llm:
           ChatOpenAI.new!(%{
-            model: "gpt-4",
+            model: "gpt-4-1106-preview",
             # don't get creative with answers
             temperature: 0,
             request_timeout: 60_000,

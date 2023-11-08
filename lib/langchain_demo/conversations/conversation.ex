@@ -15,6 +15,7 @@ defmodule LangChainDemo.Conversations.Conversation do
 
   def model_options() do
     [
+      {"gpt-4-1106-preview", "gpt-4-1106-preview"},
       {"gpt-4", "gpt-4"},
       {"gpt-3.5-turbo-16k", "gpt-3.5-turbo-16k"},
       {"gpt-3.5-turbo (stable)", "gpt-3.5-turbo"}
