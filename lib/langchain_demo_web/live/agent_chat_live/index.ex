@@ -219,7 +219,8 @@ User says:
       |> LLMChain.add_message(
         PromptTemplate.to_message!(current_user_template, %{
           current_user_json: current_user |> Jason.encode!(),
-          current_workout_json: FitnessLogs.list_fitness_logs(current_user.id, days: 0) |> Jason.encode!(),
+          current_workout_json:
+            FitnessLogs.list_fitness_logs(current_user.id, days: 0) |> Jason.encode!(),
           today: today |> Calendar.strftime("%A, %Y-%m-%d"),
           user_text: user_text
         })
@@ -244,9 +245,9 @@ User says:
     llm_chain =
       LLMChain.new!(%{
         llm:
-        ChatOpenAI.new!(%{
-          model: "gpt-4",
-          # model: "gpt-4-1106-preview",
+          ChatOpenAI.new!(%{
+            model: "gpt-4",
+            # model: "gpt-4-1106-preview",
             # don't get creative with answers
             temperature: 0,
             request_timeout: 60_000,
