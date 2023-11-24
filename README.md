@@ -37,7 +37,7 @@ For an overview and to see it in action, check out the video:
 
 [![Youtube demo video](./YoutubeLinkImage.png)](https://www.youtube.com/watch?v=AsfQNtoaB1M)
 
-There is a companion [blog post about it](https://fly.io/phoenix-files/created-my-personal-ai-fitness-trainer-in-2-days.html) as well that gives an overview of how it works.
+There is a companion [blog post about it](https://fly.io/phoenix-files/created-my-personal-ai-fitness-trainer-in-2-days/) as well that gives an overview of how it works.
 
 You can create a weekly workout plan to help you reach your goals. Information about you is stored in a local SQLite database. Report on your workouts to your assistant and they will log them for you. The assistant can access your stored information and historical workout logs to answer questions and help you on your personal fitness journey! 💪
 
