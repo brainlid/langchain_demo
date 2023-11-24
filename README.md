@@ -5,6 +5,7 @@ This project is a demonstration example using the [Elixir LangChain](https://git
 To start your LangChain Demo project:
 
   * Run `mix setup` to install and setup dependencies
+  * Setup your `export OPENAI_API_KEY=`, you can find more [here](https://platform.openai.com/docs/quickstart/step-2-setup-your-api-key)
   * Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
 
 Now you can visit [`localhost:4400`](http://localhost:4400) from your browser.
