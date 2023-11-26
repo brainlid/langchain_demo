@@ -51,7 +51,7 @@ config :tailwind,
     cd: Path.expand("../assets", __DIR__)
   ]
 
-config :langchain, :openai_key, fn -> System.fetch_env!("OPENAI_KEY") end
+config :langchain, :openai_key, fn -> System.fetch_env!("OPENAI_API_KEY") end
 
 # Configures Elixir's Logger
 config :logger, :console,
