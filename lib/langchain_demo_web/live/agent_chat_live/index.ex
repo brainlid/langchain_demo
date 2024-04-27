@@ -152,7 +152,10 @@ defmodule LangChainDemoWeb.AgentChatLive.Index do
     {:noreply, socket}
   end
 
-  # handles async function returning a successful result
+  @impl true
+  @doc """
+  Handles async function returning a successful result
+  """
   def handle_async(:running_llm, {:ok, :ok = _success_result}, socket) do
     # discard the result of the successful async function. The side-effects are
     # what we want.
@@ -259,8 +262,8 @@ User says:
         },
         verbose: false
       })
-      |> LLMChain.add_functions(UpdateCurrentUserFunction.new!())
-      |> LLMChain.add_functions(FitnessLogsTool.new_functions!())
+      |> LLMChain.add_tools(UpdateCurrentUserFunction.new!())
+      |> LLMChain.add_tools(FitnessLogsTool.new_functions!())
       |> LLMChain.add_message(
         Message.new_system!(
           ~S|
