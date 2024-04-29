@@ -103,7 +103,9 @@ defmodule LangChainDemoWeb.ConversationLive.Show do
     {:noreply, socket}
   end
 
-  # cancel the async process
+  @doc """
+  Cancel the async process
+  """
   def handle_event("cancel", _params, socket) do
     socket =
       socket
@@ -115,7 +117,10 @@ defmodule LangChainDemoWeb.ConversationLive.Show do
     {:noreply, socket}
   end
 
-  # handles async function returning a successful result
+  @impl true
+  @doc """
+  Handle the async result of the running_llm async function.
+  """
   def handle_async(:running_llm, {:ok, :ok = _success_result}, socket) do
     # discard the result of the successful async function. The side-effects are
     # what we want.
@@ -126,7 +131,7 @@ defmodule LangChainDemoWeb.ConversationLive.Show do
     {:noreply, socket}
   end
 
-  # handles async function returning an error as a result
+  # Handles async function returning an error as a result
   def handle_async(:running_llm, {:ok, {:error, reason}}, socket) do
     socket =
       socket

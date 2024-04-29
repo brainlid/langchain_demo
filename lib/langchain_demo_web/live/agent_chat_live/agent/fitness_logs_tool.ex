@@ -24,6 +24,7 @@ defmodule LangChainDemoWeb.AgentChatLive.Agent.FitnessLogsTool do
   def new_get_fitness_logs!() do
     Function.new!(%{
       name: "get_fitness_logs",
+      display_text: "Request fitness logs",
       description: "Search for and return the user's past fitness workout logs as a JSON array.",
       parameters_schema: %{
         type: "object",
@@ -81,6 +82,7 @@ defmodule LangChainDemoWeb.AgentChatLive.Agent.FitnessLogsTool do
     Function.new!(%{
       name: "create_fitness_log",
       description: "Create a new fitness log entry for the user.",
+      display_text: "Record fitness log entry",
       parameters_schema: %{
         type: "object",
         properties: %{
@@ -122,12 +124,12 @@ defmodule LangChainDemoWeb.AgentChatLive.Agent.FitnessLogsTool do
     # Use the context for the current_user
     case FitnessLogs.create_fitness_log(user.id, args) do
       {:ok, log} ->
-        send(pid, {:function_run, "Recorded fitness activity entry."})
-        "created log ##{log.id}"
+        # send(pid, {:function_run, "Recorded fitness activity entry."})
+        {:ok, "created log ##{log.id}"}
 
       {:error, changeset} ->
         errors = LangChain.Utils.changeset_error_to_string(changeset)
-        "ERROR: #{errors}"
+        {:error, "ERROR: #{errors}"}
     end
   end
 end

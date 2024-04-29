@@ -6,10 +6,13 @@ defmodule LangChainDemoWeb.AgentChatLive.Agent.ChatMessage do
   @primary_key false
   embedded_schema do
     field :role, Ecto.Enum,
-      values: [:system, :user, :assistant, :function, :function_call],
+      values: [:system, :user, :assistant, :tool],
       default: :user
+
     field :hidden, :boolean, default: true
-    field(:content, :string)
+    field :content, :string
+    field :tool_calls, {:array, :map}, default: []
+    field :tool_results, {:array, :map}, default: []
   end
 
   @type t :: %ChatMessage{}

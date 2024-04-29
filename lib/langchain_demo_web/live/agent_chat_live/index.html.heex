@@ -1,5 +1,9 @@
 <main id="agent-chat" phx-hook="BrowserTimezone">
-  <div class="hidden">
+  <.button phx-click={JS.toggle_class("hidden", to: "#hidden-data")}>
+    Toggle hidden data
+  </.button>
+
+  <div id="hidden-data" class="hidden">
     <div class="mb-10 pt-4 pb-4 border-b border-t border-gray-200 xl:pt-6 xl:border-t-0">
       <div class="flex items-center">
         <h1 class="flex-1 text-lg font-medium">Behind the Scenes Data Peek</h1>
@@ -7,7 +11,23 @@
     </div>
 
     <div class="relative z-0 divide-y divide-gray-200 border-b border-gray-200">
-      <.table id="current-user" rows={[:name, :age, :gender, :timezone, :why, :fitness_experience, :goals, :resources, :limitations, :overall_fitness_plan, :fitness_plan_for_week, :notes]}>
+      <.table
+        id="current-user"
+        rows={[
+          :name,
+          :age,
+          :gender,
+          :timezone,
+          :why,
+          :fitness_experience,
+          :goals,
+          :resources,
+          :limitations,
+          :overall_fitness_plan,
+          :fitness_plan_for_week,
+          :notes
+        ]}
+      >
         <:col :let={field} label="Field"><%= Atom.to_string(field) %></:col>
         <:col :let={field} label="Value"><%= Map.get(@current_user, field) %></:col>
       </.table>
@@ -20,37 +40,95 @@
     </div>
   </div>
   <ul role="list" class="relative z-0 divide-y divide-gray-200 border-b border-gray-200">
-    <%= for message <- @display_messages do %>
-      <li :if={message.role == :function_call} class="relative pl-4 pr-6 py-2 bg-gray-100 hover:bg-gray-200 sm:pl-6 lg:pl-8 xl:pl-6">
-        <div class="flex items-center space-x-4">
-          <div class="shrink-0 w-8">
-            <div class="text-center">
-              <.icon_for_role role={message.role} />
-            </div>
-          </div>
-          <div class="min-w-0 flex-auto">
-            <span class="whitespace-pre-wrap">
-              <%= message.content %>
-            </span>
+    <li
+      :for={message <- @display_messages}
+      class="relative pl-4 pr-6 py-3 flex justify-between gap-x-6 hover:bg-gray-50 sm:py-4 sm:pl-6 lg:pl-8 xl:pl-6"
+    >
+      <div class="flex items-start space-x-4">
+        <div class="shrink-0 w-8">
+          <div class="text-center">
+            <.icon_for_role role={message.role} />
           </div>
         </div>
-      </li>
-      <li :if={message.role != :function_call} class="relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:py-6 sm:pl-6 lg:pl-8 xl:pl-6">
-        <div class="flex items-center space-x-4">
-          <div class="shrink-0 w-8">
-            <div class="text-center">
-              <.icon_for_role role={message.role} />
+        <div class="min-w-0 flex-auto space-y-2">
+          <.markdown :if={message.role == :assistant} text={message.content} />
+          <span :if={message.role == :user} class="whitespace-pre-wrap">
+            <%= message.content %>
+          </span>
+
+          <div
+            :for={call <- message.tool_calls}
+            class="pl-2 pr-4 py-2 rounded-lg border border-gray-200 bg-gray-100 hover:bg-gray-200"
+          >
+            <div class="flex items-center space-x-4">
+              <div class="shrink-0 w-8">
+                <div class="text-center">
+                  <.icon name="hero-cog-8-tooth" />
+                </div>
+              </div>
+              <div class="min-w-0">
+                <div
+                  class="cursor-pointer"
+                  phx-click={
+                    JS.toggle_class("hidden",
+                      to: ["#call-name-#{call.call_id}", "#call-details-#{call.call_id}"]
+                    )
+                  }
+                >
+                  <.call_display_name
+                    id={"call-name-#{call.call_id}"}
+                    chain={@llm_chain}
+                    call={call}
+                  />
+                  <div id={"call-details-#{call.call_id}"} class="hidden block call-details">
+                    <.get_tool_call_display call={call} />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="min-w-0 flex-auto">
-            <.markdown :if={message.role == :assistant} text={message.content} />
-            <span :if={message.role != :assistant} class="whitespace-pre-wrap">
-              <%= message.content %>
-            </span>
+
+          <div
+            :for={result <- message.tool_results || []}
+            class="pl-2 pr-4 py-2 rounded-lg border border-gray-200 bg-gray-100 hover:bg-gray-200"
+          >
+            <div class="flex items-center space-x-4">
+              <div class="shrink-0 w-8">
+                <div :if={!result.is_error} class="text-center text-green-700">
+                  <.icon name="hero-arrow-left" />
+                </div>
+                <div :if={result.is_error} class="text-center text-red-600">
+                  <.icon name="hero-x-mark" />
+                </div>
+              </div>
+              <div
+                class="min-w-0 cursor-pointer"
+                phx-click={
+                  JS.toggle_class("hidden",
+                    to: [
+                      "#tool-result-name-#{result.tool_call_id}",
+                      "#tool-result-details-#{result.tool_call_id}"
+                    ]
+                  )
+                }
+              >
+                <.tool_result_display_name
+                  id={"tool-result-name-#{result.tool_call_id}"}
+                  class="tool-result-name"
+                  chain={@llm_chain}
+                  result={result}
+                />
+
+                <div id={"tool-result-details-#{result.tool_call_id}"} class="hidden block">
+                  <.tool_result_detail_display result={result} />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </li>
-    <% end %>
+      </div>
+    </li>
+
     <%= if @llm_chain.delta do %>
       <li class="relative pl-4 pr-6 py-5 hover:bg-gray-50 sm:py-6 sm:pl-6 lg:pl-8 xl:pl-6">
         <div class="flex items-center space-x-4">
@@ -61,15 +139,12 @@
           </div>
           <div class="min-w-0 flex-auto">
             <.markdown :if={@llm_chain.delta.role == :assistant} text={@llm_chain.delta.content} />
-            <span :if={@llm_chain.delta.role != :assistant} class="whitespace-pre-wrap">
-              <%= @llm_chain.delta.content %>
-            </span>
           </div>
         </div>
       </li>
     <% end %>
   </ul>
-  <div>
+  <div class="mt-2 sm:mt-4">
     <.simple_form for={@form} id="new-message-form" phx-change="validate" phx-submit="save">
       <.input
         field={@form[:content]}

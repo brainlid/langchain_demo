@@ -5,6 +5,8 @@ defmodule LangChainDemoWeb.AgentChatLive.Index do
   alias LangChainDemoWeb.AgentChatLive.Agent.ChatMessage
   alias LangChain.Chains.LLMChain
   alias LangChain.Message
+  alias LangChain.Message.ToolCall
+  alias LangChain.Message.ToolResult
   alias LangChain.ChatModels.ChatOpenAI
   alias LangChain.PromptTemplate
   alias LangChainDemoWeb.AgentChatLive.Agent.UpdateCurrentUserFunction
@@ -90,7 +92,7 @@ defmodule LangChainDemoWeb.AgentChatLive.Index do
   end
 
   @impl true
-  def handle_info({:chat_response, %LangChain.MessageDelta{} = delta}, socket) do
+  def handle_info({:chat_delta, %LangChain.MessageDelta{} = delta}, socket) do
     # apply the delta message to our tracked LLMChain. If it completes the
     # message, optionally display the message
     updated_chain = LLMChain.apply_delta(socket.assigns.llm_chain, delta)
@@ -98,10 +100,16 @@ defmodule LangChainDemoWeb.AgentChatLive.Index do
     socket =
       if updated_chain.delta == nil do
         case updated_chain.last_message do
-          # Messages that only execute a function have no content. Don't display if no content.
-          %Message{role: role, content: content}
+          # Messages that only execute a function have no content. Don't display
+          # if no content.
+          %Message{role: role, content: content} = message
           when role in [:user, :assistant] and is_binary(content) ->
-            append_display_message(socket, %ChatMessage{role: role, content: content})
+            append_display_message(socket, %ChatMessage{
+              role: role,
+              content: content,
+              tool_calls: message.tool_calls,
+              tool_results: message.tool_results
+            })
 
           # otherwise, not a message for display
           _other ->
@@ -115,11 +123,11 @@ defmodule LangChainDemoWeb.AgentChatLive.Index do
   end
 
   def handle_info({:updated_current_user, updated_user}, socket) do
-    message = %ChatMessage{
-      role: :function_call,
-      hidden: false,
-      content: "Updated your information."
-    }
+    # message = %ChatMessage{
+    #   role: :assistant,
+    #   hidden: false,
+    #   content: "Updated your information."
+    # }
 
     socket =
       socket
@@ -128,20 +136,21 @@ defmodule LangChainDemoWeb.AgentChatLive.Index do
         :llm_chain,
         LLMChain.update_custom_context(socket.assigns.llm_chain, %{current_user: updated_user})
       )
-      |> append_display_message(message)
+
+    # |> append_display_message(message)
 
     {:noreply, socket}
   end
 
-  def handle_info({:function_run, message}, socket) do
-    display = %ChatMessage{
-      role: :function_call,
-      hidden: false,
-      content: message
-    }
+  # def handle_info({:function_run, message}, socket) do
+  #   display = %ChatMessage{
+  #     role: :function_call,
+  #     hidden: false,
+  #     content: message
+  #   }
 
-    {:noreply, append_display_message(socket, display)}
-  end
+  #   {:noreply, append_display_message(socket, display)}
+  # end
 
   def handle_info({:task_error, reason}, socket) do
     socket = put_flash(socket, :error, "Error with chat. Reason: #{inspect(reason)}")
@@ -152,7 +161,10 @@ defmodule LangChainDemoWeb.AgentChatLive.Index do
     {:noreply, socket}
   end
 
-  # handles async function returning a successful result
+  @impl true
+  @doc """
+  Handles async function returning a successful result
+  """
   def handle_async(:running_llm, {:ok, :ok = _success_result}, socket) do
     # discard the result of the successful async function. The side-effects are
     # what we want.
@@ -203,7 +215,7 @@ defmodule LangChainDemoWeb.AgentChatLive.Index do
       PromptTemplate.from_template!(~S|
 Today is <%= @today %>
 
-User's currently known account information in JSON format:
+Current account information in JSON format:
 <%= @current_user_json %>
 
 Do an accountability follow-up with me on my previous workouts. When no previous workout information is available, help me get started.
@@ -247,7 +259,6 @@ User says:
         llm:
           ChatOpenAI.new!(%{
             model: "gpt-4",
-            # model: "gpt-4-1106-preview",
             # don't get creative with answers
             temperature: 0,
             request_timeout: 60_000,
@@ -259,11 +270,9 @@ User says:
         },
         verbose: false
       })
-      |> LLMChain.add_functions(UpdateCurrentUserFunction.new!())
-      |> LLMChain.add_functions(FitnessLogsTool.new_functions!())
-      |> LLMChain.add_message(
-        Message.new_system!(
-          ~S|
+      |> LLMChain.add_tools(UpdateCurrentUserFunction.new!())
+      |> LLMChain.add_tools(FitnessLogsTool.new_functions!())
+      |> LLMChain.add_message(Message.new_system!(~S|
 You are a helpful American virtual personal strength trainer. Your name is "Max". Limit discussions
 to ONLY discuss the user's fitness programs and fitness goals. You speak in a natural, casual and conversational tone.
 Help the user to improve their fitness and strength. Do not answer questions
@@ -289,9 +298,7 @@ Format for weekly fitness plan:
 - Activity: details like distance or sets and reps. (Weight if historical data is available)
 - Activity: details. (Weight)
 
-Before modifying the user's training program, summarize the change and confirm it is what they want.|
-        )
-      )
+Before modifying the user's training program, summarize the change and confirm the change.|))
 
     socket
     |> assign(:llm_chain, llm_chain)
@@ -303,7 +310,7 @@ Before modifying the user's training program, summarize the change and confirm i
 
     callback_fn = fn
       %LangChain.MessageDelta{} = delta ->
-        send(live_view_pid, {:chat_response, delta})
+        send(live_view_pid, {:chat_delta, delta})
 
       %LangChain.Message{} = _message ->
         # disregard the full-message callback. We'll use the delta
@@ -343,7 +350,7 @@ Before modifying the user's training program, summarize the change and confirm i
         :assistant ->
           "hero-computer-desktop"
 
-        :function_call ->
+        :tool ->
           "hero-cog-8-tooth"
 
         _other ->
@@ -354,6 +361,74 @@ Before modifying the user's training program, summarize the change and confirm i
 
     ~H"""
     <.icon name={@icon_name} />
+    """
+  end
+
+  attr :id, :string, required: true
+  attr :chain, :any, required: true
+  attr :call, :any, required: true
+  attr :class, :string, default: nil
+
+  def call_display_name(assigns) do
+    call = assigns.call
+    chain = assigns.chain
+
+    text =
+      LangChain.Function.get_display_text(
+        chain.tools,
+        call.name,
+        "Call tool #{call.name}"
+      )
+
+    assigns = assign(assigns, :text, text)
+
+    ~H"""
+    <div id={@id} class={["font-medium text-gray-700", @class]}>
+      <div><%= @text %></div>
+    </div>
+    """
+  end
+
+  attr :call, :any, required: true
+
+  defp get_tool_call_display(assigns) do
+    ~H"""
+    <div class="text-gray-700">
+      <div class="block text-sm font-medium text-gray-700">Tool Name:</div>
+      <div class="mt-2 text-gray-600 font-mono"><%= @call.name %></div>
+
+      <div class="mt-4 block text-sm font-medium text-gray-700">Arguments:</div>
+      <pre class="mt-2 px-4 py-2 bg-slate-700 text-gray-100 rounded-md"><code class="text-wrap"><%= inspect(@call.arguments) %></code></pre>
+    </div>
+    """
+  end
+
+  attr :id, :string, required: true
+  attr :chain, :any, required: true
+  attr :result, :any, required: true
+  attr :class, :string, default: nil
+
+  def tool_result_display_name(assigns) do
+    chain = assigns.chain
+    text = LangChain.Function.get_display_text(chain.tools, assigns.result.name, "Perform action")
+    assigns = assign(assigns, :text, text)
+
+    ~H"""
+    <span id={@id} class={@class}><%= @text %></span>
+    """
+  end
+
+  attr :result, :any, required: true
+
+  defp tool_result_detail_display(assigns) do
+    ~H"""
+    <div class="text-gray-700">
+      <div class="block text-sm font-medium text-gray-700">Tool Name:</div>
+      <div class="mt-2 text-gray-600 font-mono"><%= @result.name %></div>
+
+      <div class="mt-4 block text-sm font-medium text-gray-700">Content:</div>
+      <pre class="mt-2 px-4 py-2 bg-slate-700 text-gray-100 rounded-md"><code class="text-wrap"><%= inspect(@result.content) %></code></pre>
+    </div>
     """
   end
 end

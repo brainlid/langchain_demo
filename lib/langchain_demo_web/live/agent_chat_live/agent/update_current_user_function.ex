@@ -16,6 +16,7 @@ defmodule LangChainDemoWeb.AgentChatLive.Agent.UpdateCurrentUserFunction do
   def new() do
     Function.new(%{
       name: "update_current_user",
+      display_text: "Update user",
       description: "Update one or more fields at a time on the user's account and workout information.",
       parameters_schema: %{
         type: "object",
@@ -101,11 +102,11 @@ defmodule LangChainDemoWeb.AgentChatLive.Agent.UpdateCurrentUserFunction do
       {:ok, updated_user} ->
         send(pid, {:updated_current_user, updated_user})
         # return text to the LLM letting it know the result of the action
-        "success"
+        {:ok, "success"}
 
       {:error, changeset} ->
         reason = LangChain.Utils.changeset_error_to_string(changeset)
-        "ERROR: #{reason}"
+        {:error, "ERROR: #{reason}"}
     end
   end
 end
