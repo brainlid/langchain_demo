@@ -4,6 +4,7 @@ defmodule LangChainDemoWeb.AgentChatLive.Agent.FitnessLogsTool do
   """
   require Logger
   alias LangChain.Function
+  alias LangChain.FunctionParam
   alias LangChainDemo.FitnessLogs
 
   @doc """
@@ -26,22 +27,19 @@ defmodule LangChainDemoWeb.AgentChatLive.Agent.FitnessLogsTool do
       name: "get_fitness_logs",
       display_text: "Request fitness logs",
       description: "Search for and return the user's past fitness workout logs as a JSON array.",
-      parameters_schema: %{
-        type: "object",
-        properties: %{
-          days: %{
-            type: "integer",
-            description:
-              "The number of days of history to return from the search. Defaults to 12."
-          },
-          activity: %{
-            type: "string",
-            description:
-              "The name of the activity being search for. Searches for one activity at a time, but supports partial matches. An activity of \"bench\" will return both Incline Bench and Bench Press."
-          }
-        },
-        required: []
-      },
+      parameters: [
+        FunctionParam.new!(%{
+          name: "days",
+          type: :integer,
+          description: "The number of days of history to return from the search. Defaults to 12"
+        }),
+        FunctionParam.new!(%{
+          name: "activity",
+          type: :string,
+          description:
+            "The name of the activity being search for. Searches for one activity at a time, but supports partial matches. An activity of \"bench\" returns both Incline Bench and Bench Press"
+        })
+      ],
       function: &execute_get_fitness_logs/2
     })
   end
@@ -83,35 +81,35 @@ defmodule LangChainDemoWeb.AgentChatLive.Agent.FitnessLogsTool do
       name: "create_fitness_log",
       description: "Create a new fitness log entry for the user.",
       display_text: "Record fitness log entry",
-      parameters_schema: %{
-        type: "object",
-        properties: %{
-          date: %{
-            type: "string",
-            description:
-              "The date the activity was performed as a string in the format YYYY-MM-DD."
-          },
-          activity: %{
-            type: "string",
-            description:
-              "The name of the activity. Ex: Running, Elliptical, Bench Press, Push Ups, Bent-Over Rows, etc."
-          },
-          amount: %{
-            type: "integer",
-            description:
-              "Either the duration in time, a distance traveled, the number of times an activity was performed (like push-ups), or the weight used (like \"25\" for 25 lbs)."
-          },
-          units: %{
-            type: "string",
-            description: "One word unit for the amount. Ex: lbs, minutes, miles, count."
-          },
-          notes: %{
-            type: "string",
-            description: "Notes about the activity. How it went, heart rate, etc."
-          }
-        },
-        required: []
-      },
+      parameters: [
+        FunctionParam.new!(%{
+          name: "date",
+          type: :string,
+          description: "The date the activity was performed as a string in the format YYYY-MM-DD"
+        }),
+        FunctionParam.new!(%{
+          name: "activity",
+          type: :string,
+          description:
+            "The name of the activity. Ex: Running, Elliptical, Bench Press, Push Ups, Bent-Over Rows, etc"
+        }),
+        FunctionParam.new!(%{
+          name: "amount",
+          type: :integer,
+          description:
+            "Either the duration in time, a distance traveled, the number of times an activity was performed (like push-ups), or the weight used (like \"25\" for 25 lbs)"
+        }),
+        FunctionParam.new!(%{
+          name: "units",
+          type: :string,
+          description: "One word unit for the amount. Ex: lbs, minutes, miles, count"
+        }),
+        FunctionParam.new!(%{
+          name: "notes",
+          type: :string,
+          description: "Notes about the activity. How it went, heart rate, etc"
+        })
+      ],
       function: &execute_create_fitness_log/2
     })
   end

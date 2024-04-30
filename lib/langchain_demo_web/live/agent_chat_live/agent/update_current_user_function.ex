@@ -7,6 +7,7 @@ defmodule LangChainDemoWeb.AgentChatLive.Agent.UpdateCurrentUserFunction do
   """
   require Logger
   alias LangChain.Function
+  alias LangChain.FunctionParam
   alias LangChainDemo.FitnessUsers
 
   @doc """
@@ -17,65 +18,68 @@ defmodule LangChainDemoWeb.AgentChatLive.Agent.UpdateCurrentUserFunction do
     Function.new(%{
       name: "update_current_user",
       display_text: "Update user",
-      description: "Update one or more fields at a time on the user's account and workout information.",
-      parameters_schema: %{
-        type: "object",
-        properties: %{
-          age: %{
-            type: "integer",
-            description: "The user's age."
-          },
-          overall_fitness_plan: %{
-            type: "string",
-            description:
-              "Description of the user's current overall fitness plan."
-          },
-          fitness_experience: %{
-            type: "string",
-            description:
-              "The user's experience with physical fitness. Used to customize instructions. Accepted values are: beginner, intermediate, or advanced"
-          },
-          gender: %{
-            type: "string",
-            description: "The user's gender. Used to help customize workouts."
-          },
-          goals: %{
-            type: "string",
-            description:
-              "The user's current set of goals. CSV list of goals. (Ex: 12 bicep curls at 35 lbs, run a mile without walking)"
-          },
-          name: %{
-            type: "string",
-            description: "The user's name. Used to customize the interaction and training."
-          },
-          resources: %{
-            type: "string",
-            description:
-              "CSV list of fitness resources available to the user. (Ex: gym membership, rack of free weight dumbbells, stationary bike)"
-          },
-          why: %{
-            type: "string",
-            description:
-              "The user's reasons for wanting to improve fitness. Used for motivation and to customize the fitness plan to satisfy the user."
-          },
-          limitations: %{
-            type: "string",
-            description:
-              "CSV list of any physical limitations the user has that may impact which exercises they can do."
-          },
-          notes: %{
-            type: "string",
-            description:
-              "Place to store relevant and temporary notes about the user for future reference."
-          },
-          fitness_plan_for_week: %{
-            type: "string",
-            description:
-              "The user's specific workout plan for the week."
-          }
-        },
-        required: []
-      },
+      description:
+        "Update one or more fields at a time on the user's account and workout information.",
+      parameters: [
+        FunctionParam.new!(%{name: "age", type: :integer, description: "The user's age"}),
+        FunctionParam.new!(%{
+          name: "overall_fitness_plan",
+          type: :string,
+          description: "Description of the user's current overall fitness plan"
+        }),
+        FunctionParam.new!(%{
+          name: "fitness_experience",
+          type: :string,
+          enum: ["beginner", "intermediate", "advance"],
+          description:
+            "The user's experience with physical fitness. Used to customize instructions."
+        }),
+        FunctionParam.new!(%{
+          name: "gender",
+          type: :string,
+          description: "The user's gender. Used to help customize workouts"
+        }),
+        FunctionParam.new!(%{
+          name: "goals",
+          type: :string,
+          description:
+            "The user's current set of goals. CSV list of goals. (Ex: 12 bicep curls at 35 lbs, run a mile without walking)"
+        }),
+        FunctionParam.new!(%{
+          name: "name",
+          type: :string,
+          description: "The user's name. Used to customize the interaction and training"
+        }),
+        FunctionParam.new!(%{
+          name: "resources",
+          type: :string,
+          description:
+            "CSV list of fitness resources available to the user. (Ex: gym membership, rack of free weight dumbbells, stationary bike)"
+        }),
+        FunctionParam.new!(%{
+          name: "why",
+          type: :string,
+          description:
+            "The user's reasons for wanting to improve fitness. Used for motivation and to customize the fitness plan to satisfy the user"
+        }),
+        FunctionParam.new!(%{
+          name: "limitations",
+          type: :string,
+          description:
+            "CSV list of any physical limitations the user has that may impact which exercises they can do"
+        }),
+        FunctionParam.new!(%{
+          name: "notes",
+          type: :string,
+          description:
+            "Place to store relevant and temporary notes about the user for future reference"
+        }),
+        FunctionParam.new!(%{
+          name: "fitness_plan_for_week",
+          type: :string,
+          description: "The user's specific workout plan for the week"
+        })
+      ],
       function: &execute/2
     })
   end
