@@ -93,28 +93,24 @@ defmodule LangChainDemoWeb.AgentChatLive.Index do
 
   @impl true
   def handle_info({:chat_delta, %LangChain.MessageDelta{} = delta}, socket) do
-    # apply the delta message to our tracked LLMChain. If it completes the
-    # message, optionally display the message
+    # This is where LLM generated content gets processed and merged to the
+    # LLMChain managed by the state in this LiveView process.
+
+    # Apply the delta message to our tracked LLMChain. If it completes the
+    # message, display the message
     updated_chain = LLMChain.apply_delta(socket.assigns.llm_chain, delta)
     # if this completed the delta, create the message and track on the chain
     socket =
       if updated_chain.delta == nil do
-        case updated_chain.last_message do
-          # Messages that only execute a function have no content. Don't display
-          # if no content.
-          %Message{role: role, content: content} = message
-          when role in [:user, :assistant] and is_binary(content) ->
-            append_display_message(socket, %ChatMessage{
-              role: role,
-              content: content,
-              tool_calls: message.tool_calls,
-              tool_results: message.tool_results
-            })
+        # the delta completed the message. Examine the last message
+        message = updated_chain.last_message
 
-          # otherwise, not a message for display
-          _other ->
-            socket
-        end
+        append_display_message(socket, %ChatMessage{
+          role: message.role,
+          content: message.content,
+          tool_calls: message.tool_calls,
+          tool_results: message.tool_results
+        })
       else
         socket
       end
@@ -122,13 +118,23 @@ defmodule LangChainDemoWeb.AgentChatLive.Index do
     {:noreply, assign(socket, :llm_chain, updated_chain)}
   end
 
-  def handle_info({:updated_current_user, updated_user}, socket) do
-    # message = %ChatMessage{
-    #   role: :assistant,
-    #   hidden: false,
-    #   content: "Updated your information."
-    # }
+  def handle_info({:tool_executed, tool_message}, socket) do
+    message = %ChatMessage{
+      role: tool_message.role,
+      hidden: false,
+      content: nil,
+      tool_results: tool_message.tool_results
+    }
 
+    socket =
+      socket
+      |> assign(:llm_chain, LLMChain.add_message(socket.assigns.llm_chain, tool_message))
+      |> append_display_message(message)
+
+    {:noreply, socket}
+  end
+
+  def handle_info({:updated_current_user, updated_user}, socket) do
     socket =
       socket
       |> assign(:current_user, updated_user)
@@ -137,20 +143,8 @@ defmodule LangChainDemoWeb.AgentChatLive.Index do
         LLMChain.update_custom_context(socket.assigns.llm_chain, %{current_user: updated_user})
       )
 
-    # |> append_display_message(message)
-
     {:noreply, socket}
   end
-
-  # def handle_info({:function_run, message}, socket) do
-  #   display = %ChatMessage{
-  #     role: :function_call,
-  #     hidden: false,
-  #     content: message
-  #   }
-
-  #   {:noreply, append_display_message(socket, display)}
-  # end
 
   def handle_info({:task_error, reason}, socket) do
     socket = put_flash(socket, :error, "Error with chat. Reason: #{inspect(reason)}")
@@ -312,9 +306,12 @@ Before modifying the user's training program, summarize the change and confirm t
       %LangChain.MessageDelta{} = delta ->
         send(live_view_pid, {:chat_delta, delta})
 
+      %LangChain.Message{role: :tool} = message ->
+        send(live_view_pid, {:tool_executed, message})
+
       %LangChain.Message{} = _message ->
-        # disregard the full-message callback. We'll use the delta
-        # send(live_view_pid, {:chat_response, message})
+        # disregard the other full-message callbacks. We use the :chat_delta
+        # message to update the LLMChain state in the LiveView process.
         :ok
     end
 
@@ -340,95 +337,5 @@ Before modifying the user's training program, summarize the change and confirm t
 
   defp append_display_message(socket, %ChatMessage{} = message) do
     assign(socket, :display_messages, socket.assigns.display_messages ++ [message])
-  end
-
-  attr(:role, :atom, required: true)
-
-  defp icon_for_role(assigns) do
-    icon_name =
-      case assigns.role do
-        :assistant ->
-          "hero-computer-desktop"
-
-        :tool ->
-          "hero-cog-8-tooth"
-
-        _other ->
-          "hero-user"
-      end
-
-    assigns = assign(assigns, :icon_name, icon_name)
-
-    ~H"""
-    <.icon name={@icon_name} />
-    """
-  end
-
-  attr :id, :string, required: true
-  attr :chain, :any, required: true
-  attr :call, :any, required: true
-  attr :class, :string, default: nil
-
-  def call_display_name(assigns) do
-    call = assigns.call
-    chain = assigns.chain
-
-    text =
-      LangChain.Function.get_display_text(
-        chain.tools,
-        call.name,
-        "Call tool #{call.name}"
-      )
-
-    assigns = assign(assigns, :text, text)
-
-    ~H"""
-    <div id={@id} class={["font-medium text-gray-700", @class]}>
-      <div><%= @text %></div>
-    </div>
-    """
-  end
-
-  attr :call, :any, required: true
-
-  defp get_tool_call_display(assigns) do
-    ~H"""
-    <div class="text-gray-700">
-      <div class="block text-sm font-medium text-gray-700">Tool Name:</div>
-      <div class="mt-2 text-gray-600 font-mono"><%= @call.name %></div>
-
-      <div class="mt-4 block text-sm font-medium text-gray-700">Arguments:</div>
-      <pre class="mt-2 px-4 py-2 bg-slate-700 text-gray-100 rounded-md"><code class="text-wrap"><%= inspect(@call.arguments) %></code></pre>
-    </div>
-    """
-  end
-
-  attr :id, :string, required: true
-  attr :chain, :any, required: true
-  attr :result, :any, required: true
-  attr :class, :string, default: nil
-
-  def tool_result_display_name(assigns) do
-    chain = assigns.chain
-    text = LangChain.Function.get_display_text(chain.tools, assigns.result.name, "Perform action")
-    assigns = assign(assigns, :text, text)
-
-    ~H"""
-    <span id={@id} class={@class}><%= @text %></span>
-    """
-  end
-
-  attr :result, :any, required: true
-
-  defp tool_result_detail_display(assigns) do
-    ~H"""
-    <div class="text-gray-700">
-      <div class="block text-sm font-medium text-gray-700">Tool Name:</div>
-      <div class="mt-2 text-gray-600 font-mono"><%= @result.name %></div>
-
-      <div class="mt-4 block text-sm font-medium text-gray-700">Content:</div>
-      <pre class="mt-2 px-4 py-2 bg-slate-700 text-gray-100 rounded-md"><code class="text-wrap"><%= inspect(@result.content) %></code></pre>
-    </div>
-    """
   end
 end

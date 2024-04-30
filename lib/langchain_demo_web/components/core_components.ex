@@ -825,4 +825,94 @@ defmodule LangChainDemoWeb.CoreComponents do
     </div>
     """
   end
+
+  attr :role, :atom, required: true
+
+  def icon_for_role(assigns) do
+    icon_name =
+      case assigns.role do
+        :assistant ->
+          "hero-computer-desktop"
+
+        :tool ->
+          "hero-cog-8-tooth"
+
+        _other ->
+          "hero-user"
+      end
+
+    assigns = assign(assigns, :icon_name, icon_name)
+
+    ~H"""
+    <.icon name={@icon_name} />
+    """
+  end
+
+  attr :id, :string, required: true
+  attr :chain, :any, required: true
+  attr :call, :any, required: true
+  attr :class, :string, default: nil
+
+  def call_display_name(assigns) do
+    call = assigns.call
+    chain = assigns.chain
+
+    text =
+      LangChain.Function.get_display_text(
+        chain.tools,
+        call.name,
+        "Call tool #{call.name}"
+      )
+
+    assigns = assign(assigns, :text, text)
+
+    ~H"""
+    <div id={@id} class={["font-medium text-gray-700", @class]}>
+      <div><%= @text %></div>
+    </div>
+    """
+  end
+
+  attr :call, :any, required: true
+
+  def get_tool_call_display(assigns) do
+    ~H"""
+    <div class="text-gray-700">
+      <div class="block text-sm font-medium text-gray-700">Tool Name:</div>
+      <div class="mt-2 text-gray-600 font-mono"><%= @call.name %></div>
+
+      <div class="mt-4 block text-sm font-medium text-gray-700">Arguments:</div>
+      <pre class="mt-2 px-4 py-2 bg-slate-700 text-gray-100 rounded-md"><code class="text-wrap"><%= inspect(@call.arguments) %></code></pre>
+    </div>
+    """
+  end
+
+  attr :id, :string, required: true
+  attr :chain, :any, required: true
+  attr :result, :any, required: true
+  attr :class, :string, default: nil
+
+  def tool_result_display_name(assigns) do
+    chain = assigns.chain
+    text = LangChain.Function.get_display_text(chain.tools, assigns.result.name, "Perform action")
+    assigns = assign(assigns, :text, text)
+
+    ~H"""
+    <span id={@id} class={@class}><%= @text %></span>
+    """
+  end
+
+  attr :result, :any, required: true
+
+  def tool_result_detail_display(assigns) do
+    ~H"""
+    <div class="text-gray-700">
+      <div class="block text-sm font-medium text-gray-700">Tool Name:</div>
+      <div class="mt-2 text-gray-600 font-mono"><%= @result.name %></div>
+
+      <div class="mt-4 block text-sm font-medium text-gray-700">Content:</div>
+      <pre class="mt-2 px-4 py-2 bg-slate-700 text-gray-100 rounded-md"><code class="text-wrap"><%= inspect(@result.content) %></code></pre>
+    </div>
+    """
+  end
 end
