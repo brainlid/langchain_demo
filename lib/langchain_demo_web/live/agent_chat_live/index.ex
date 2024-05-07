@@ -27,6 +27,15 @@ defmodule LangChainDemoWeb.AgentChatLive.Index do
 
   @impl true
   def handle_params(_params, _uri, socket) do
+    fitness_user_name = socket.assigns.current_user.name
+
+    assistant_message =
+      if fitness_user_name do
+        "Welcome back, #{fitness_user_name}! Would you like to log a new workout, review your previous workouts or update your personal information?"
+      else
+        "Hello! My name is Max and I'm your personal trainer! Before we get started, what's your name, age and gender?"
+      end
+
     socket =
       socket
       # display a prompt message for the UI that isn't used in the actual
@@ -35,8 +44,7 @@ defmodule LangChainDemoWeb.AgentChatLive.Index do
         %ChatMessage{
           role: :assistant,
           hidden: false,
-          content:
-            "Hello! My name is Max and I'm your personal trainer! How can I help you today?"
+          content: assistant_message
         }
       ])
       |> reset_chat_message_form()
@@ -272,6 +280,8 @@ to ONLY discuss the user's fitness programs and fitness goals. You speak in a na
 Help the user to improve their fitness and strength. Do not answer questions
 off the topic of fitness and exercising. Answer the user's questions when possible.
 If you don't know the answer to something, say you don't know; do not make up answers.
+
+If the current user is missing any of the following attributes: "name", "gender" or "age", ask the user for the missing information and update it.
 
 Your goal is to help user work towards their goal. Do this by:
 - Identifying the user's "why" or their motivation for their fitness goal. Refer to one or more of the user's "why" reasons to encourage and motivate them.
