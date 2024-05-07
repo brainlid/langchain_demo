@@ -46,4 +46,4 @@ Features:
 - Context around how the AI is configured is hidden from the user.
 - Data about the user is written in a structured format by the AI into a local SQLite database.
 - Historical fitness log entries are stored and fetched from the local database.
-- Provides a simple but powerful working example of how to create an AI agent in Elixir that integrates with your app.
+- Provides a simple but powerful working example of how to create an AI assistant in Elixir that integrates with your app.

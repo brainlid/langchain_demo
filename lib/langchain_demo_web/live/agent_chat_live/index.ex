@@ -5,6 +5,8 @@ defmodule LangChainDemoWeb.AgentChatLive.Index do
   alias LangChainDemoWeb.AgentChatLive.Agent.ChatMessage
   alias LangChain.Chains.LLMChain
   alias LangChain.Message
+  alias LangChain.Message.ToolCall
+  alias LangChain.Message.ToolResult
   alias LangChain.ChatModels.ChatOpenAI
   alias LangChain.PromptTemplate
   alias LangChainDemoWeb.AgentChatLive.Agent.UpdateCurrentUserFunction
@@ -90,23 +92,25 @@ defmodule LangChainDemoWeb.AgentChatLive.Index do
   end
 
   @impl true
-  def handle_info({:chat_response, %LangChain.MessageDelta{} = delta}, socket) do
-    # apply the delta message to our tracked LLMChain. If it completes the
-    # message, optionally display the message
+  def handle_info({:chat_delta, %LangChain.MessageDelta{} = delta}, socket) do
+    # This is where LLM generated content gets processed and merged to the
+    # LLMChain managed by the state in this LiveView process.
+
+    # Apply the delta message to our tracked LLMChain. If it completes the
+    # message, display the message
     updated_chain = LLMChain.apply_delta(socket.assigns.llm_chain, delta)
     # if this completed the delta, create the message and track on the chain
     socket =
       if updated_chain.delta == nil do
-        case updated_chain.last_message do
-          # Messages that only execute a function have no content. Don't display if no content.
-          %Message{role: role, content: content}
-          when role in [:user, :assistant] and is_binary(content) ->
-            append_display_message(socket, %ChatMessage{role: role, content: content})
+        # the delta completed the message. Examine the last message
+        message = updated_chain.last_message
 
-          # otherwise, not a message for display
-          _other ->
-            socket
-        end
+        append_display_message(socket, %ChatMessage{
+          role: message.role,
+          content: message.content,
+          tool_calls: message.tool_calls,
+          tool_results: message.tool_results
+        })
       else
         socket
       end
@@ -114,13 +118,23 @@ defmodule LangChainDemoWeb.AgentChatLive.Index do
     {:noreply, assign(socket, :llm_chain, updated_chain)}
   end
 
-  def handle_info({:updated_current_user, updated_user}, socket) do
+  def handle_info({:tool_executed, tool_message}, socket) do
     message = %ChatMessage{
-      role: :function_call,
+      role: tool_message.role,
       hidden: false,
-      content: "Updated your information."
+      content: nil,
+      tool_results: tool_message.tool_results
     }
 
+    socket =
+      socket
+      |> assign(:llm_chain, LLMChain.add_message(socket.assigns.llm_chain, tool_message))
+      |> append_display_message(message)
+
+    {:noreply, socket}
+  end
+
+  def handle_info({:updated_current_user, updated_user}, socket) do
     socket =
       socket
       |> assign(:current_user, updated_user)
@@ -128,19 +142,8 @@ defmodule LangChainDemoWeb.AgentChatLive.Index do
         :llm_chain,
         LLMChain.update_custom_context(socket.assigns.llm_chain, %{current_user: updated_user})
       )
-      |> append_display_message(message)
 
     {:noreply, socket}
-  end
-
-  def handle_info({:function_run, message}, socket) do
-    display = %ChatMessage{
-      role: :function_call,
-      hidden: false,
-      content: message
-    }
-
-    {:noreply, append_display_message(socket, display)}
   end
 
   def handle_info({:task_error, reason}, socket) do
@@ -152,7 +155,10 @@ defmodule LangChainDemoWeb.AgentChatLive.Index do
     {:noreply, socket}
   end
 
-  # handles async function returning a successful result
+  @impl true
+  @doc """
+  Handles async function returning a successful result
+  """
   def handle_async(:running_llm, {:ok, :ok = _success_result}, socket) do
     # discard the result of the successful async function. The side-effects are
     # what we want.
@@ -203,7 +209,7 @@ defmodule LangChainDemoWeb.AgentChatLive.Index do
       PromptTemplate.from_template!(~S|
 Today is <%= @today %>
 
-User's currently known account information in JSON format:
+Current account information in JSON format:
 <%= @current_user_json %>
 
 Do an accountability follow-up with me on my previous workouts. When no previous workout information is available, help me get started.
@@ -247,7 +253,6 @@ User says:
         llm:
           ChatOpenAI.new!(%{
             model: "gpt-4",
-            # model: "gpt-4-1106-preview",
             # don't get creative with answers
             temperature: 0,
             request_timeout: 60_000,
@@ -259,11 +264,9 @@ User says:
         },
         verbose: false
       })
-      |> LLMChain.add_functions(UpdateCurrentUserFunction.new!())
-      |> LLMChain.add_functions(FitnessLogsTool.new_functions!())
-      |> LLMChain.add_message(
-        Message.new_system!(
-          ~S|
+      |> LLMChain.add_tools(UpdateCurrentUserFunction.new!())
+      |> LLMChain.add_tools(FitnessLogsTool.new_functions!())
+      |> LLMChain.add_message(Message.new_system!(~S|
 You are a helpful American virtual personal strength trainer. Your name is "Max". Limit discussions
 to ONLY discuss the user's fitness programs and fitness goals. You speak in a natural, casual and conversational tone.
 Help the user to improve their fitness and strength. Do not answer questions
@@ -289,9 +292,7 @@ Format for weekly fitness plan:
 - Activity: details like distance or sets and reps. (Weight if historical data is available)
 - Activity: details. (Weight)
 
-Before modifying the user's training program, summarize the change and confirm it is what they want.|
-        )
-      )
+Before modifying the user's training program, summarize the change and confirm the change.|))
 
     socket
     |> assign(:llm_chain, llm_chain)
@@ -303,11 +304,14 @@ Before modifying the user's training program, summarize the change and confirm i
 
     callback_fn = fn
       %LangChain.MessageDelta{} = delta ->
-        send(live_view_pid, {:chat_response, delta})
+        send(live_view_pid, {:chat_delta, delta})
+
+      %LangChain.Message{role: :tool} = message ->
+        send(live_view_pid, {:tool_executed, message})
 
       %LangChain.Message{} = _message ->
-        # disregard the full-message callback. We'll use the delta
-        # send(live_view_pid, {:chat_response, message})
+        # disregard the other full-message callbacks. We use the :chat_delta
+        # message to update the LLMChain state in the LiveView process.
         :ok
     end
 
@@ -333,27 +337,5 @@ Before modifying the user's training program, summarize the change and confirm i
 
   defp append_display_message(socket, %ChatMessage{} = message) do
     assign(socket, :display_messages, socket.assigns.display_messages ++ [message])
-  end
-
-  attr(:role, :atom, required: true)
-
-  defp icon_for_role(assigns) do
-    icon_name =
-      case assigns.role do
-        :assistant ->
-          "hero-computer-desktop"
-
-        :function_call ->
-          "hero-cog-8-tooth"
-
-        _other ->
-          "hero-user"
-      end
-
-    assigns = assign(assigns, :icon_name, icon_name)
-
-    ~H"""
-    <.icon name={@icon_name} />
-    """
   end
 end
