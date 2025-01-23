@@ -125,7 +125,7 @@ defmodule LangChainDemo.Messages do
     Enum.map(messages, fn db_msg ->
       LangChain.Message.new!(%{
         role: db_msg.role,
-        content: db_msg.content,
+        content: db_msg.content
       })
     end)
   end

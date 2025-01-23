@@ -2,7 +2,9 @@
 
 <.header>
   <%= @conversation.name %>
-  <:subtitle><%= @conversation.model %> - Started <%= display_date(@conversation.inserted_at) %></:subtitle>
+  <:subtitle>
+    <%= @conversation.model %> - Started <%= display_date(@conversation.inserted_at) %>
+  </:subtitle>
   <:actions>
     <.link patch={~p"/conversations/#{@conversation}/show/edit"} phx-click={JS.push_focus()}>
       <.button>Edit</.button>
@@ -20,13 +22,17 @@
       <div class="shrink-0 w-16">
         <div class="text-center">
           <.icon name={role_icon(message.role)} class="mx-auto w-8 h-8 text-gray-400 block" />
-          <p class="mt-1 text-xs text-gray-400 leading-none select-none"><%= display_date(message.updated_at) %></p>
+          <p class="mt-1 text-xs text-gray-400 leading-none select-none">
+            <%= display_date(message.updated_at) %>
+          </p>
           <p class="mt-1 text-xs text-gray-400 leading-none select-none"><%= message.status %></p>
         </div>
       </div>
       <div class="min-w-0 flex-auto">
         <.markdown :if={message.role == "assistant"} text={message.content} />
-        <span :if={message.role != "assistant"} class="whitespace-pre-wrap"><%= message.content %></span>
+        <span :if={message.role != "assistant"} class="whitespace-pre-wrap">
+          <%= message.content %>
+        </span>
       </div>
     </div>
     <div class="hidden sm:flex sm:flex-col sm:items-end">
@@ -50,18 +56,23 @@
   </li>
   <%= if @llm_chain.delta do %>
     <li
-      id={"row-delta"}
+      id="row-delta"
       class={["flex justify-between gap-x-6 px-4 py-5", message_block_classes(@llm_chain.delta)]}
     >
       <div class="flex gap-x-4">
         <div class="shrink-0 w-16">
           <div class="text-center">
-            <.icon name={role_icon(@llm_chain.delta.role)} class="mx-auto w-8 h-8 text-gray-400 block" />
+            <.icon
+              name={role_icon(@llm_chain.delta.role)}
+              class="mx-auto w-8 h-8 text-gray-400 block"
+            />
           </div>
         </div>
         <div class="min-w-0 flex-auto">
           <.markdown :if={@llm_chain.delta.role == "assistant"} text={@llm_chain.delta.content} />
-          <span :if={@llm_chain.delta.role != "assistant"} class="whitespace-pre-wrap"><%= @llm_chain.delta.content %></span>
+          <span :if={@llm_chain.delta.role != "assistant"} class="whitespace-pre-wrap">
+            <%= @llm_chain.delta.content %>
+          </span>
         </div>
       </div>
       <div class="hidden sm:flex sm:flex-col sm:items-end">

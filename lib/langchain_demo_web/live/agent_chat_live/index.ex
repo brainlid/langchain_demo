@@ -1,14 +1,14 @@
 defmodule LangChainDemoWeb.AgentChatLive.Index do
   use LangChainDemoWeb, :live_view
 
+  require Logger
   alias Phoenix.LiveView.AsyncResult
   alias LangChainDemoWeb.AgentChatLive.Agent.ChatMessage
   alias LangChain.Chains.LLMChain
   alias LangChain.Message
-  alias LangChain.Message.ToolCall
-  alias LangChain.Message.ToolResult
   alias LangChain.ChatModels.ChatOpenAI
   alias LangChain.PromptTemplate
+  alias LangChain.LangChainError
   alias LangChainDemoWeb.AgentChatLive.Agent.UpdateCurrentUserFunction
   alias LangChainDemoWeb.AgentChatLive.Agent.FitnessLogsTool
   alias LangChainDemo.FitnessUsers
@@ -248,11 +248,23 @@ User says:
   end
 
   defp assign_llm_chain(socket) do
+    live_view_pid = self()
+
+    handlers = %{
+      on_llm_new_delta: fn _chain, %LangChain.MessageDelta{} = delta ->
+        send(live_view_pid, {:chat_delta, delta})
+      end,
+      # record tool result
+      on_tool_response_created: fn _chain, %LangChain.Message{role: :tool} = message ->
+        send(live_view_pid, {:tool_executed, message})
+      end
+    }
+
     llm_chain =
       LLMChain.new!(%{
         llm:
           ChatOpenAI.new!(%{
-            model: "gpt-4",
+            model: "gpt-4o",
             # don't get creative with answers
             temperature: 0,
             request_timeout: 60_000,
@@ -262,8 +274,9 @@ User says:
           live_view_pid: self(),
           current_user: socket.assigns.current_user
         },
-        verbose: false
+        verbose: true
       })
+      |> LLMChain.add_callback(handlers)
       |> LLMChain.add_tools(UpdateCurrentUserFunction.new!())
       |> LLMChain.add_tools(FitnessLogsTool.new_functions!())
       |> LLMChain.add_message(Message.new_system!(~S|
@@ -300,32 +313,19 @@ Before modifying the user's training program, summarize the change and confirm t
 
   def run_chain(socket) do
     chain = socket.assigns.llm_chain
-    live_view_pid = self()
-
-    callback_fn = fn
-      %LangChain.MessageDelta{} = delta ->
-        send(live_view_pid, {:chat_delta, delta})
-
-      %LangChain.Message{role: :tool} = message ->
-        send(live_view_pid, {:tool_executed, message})
-
-      %LangChain.Message{} = _message ->
-        # disregard the other full-message callbacks. We use the :chat_delta
-        # message to update the LLMChain state in the LiveView process.
-        :ok
-    end
 
     socket
     |> assign(:async_result, AsyncResult.loading())
     |> start_async(:running_llm, fn ->
-      case LLMChain.run(chain, while_needs_response: true, callback_fn: callback_fn) do
+      case LLMChain.run(chain, mode: :while_needs_response) do
         # Don't return a large success result. Callbacks return what we want.
-        {:ok, _updated_chain, _last_message} ->
+        {:ok, _updated_chain} ->
           :ok
 
         # return the errors for display
-        {:error, reason} ->
-          {:error, reason}
+        {:error, _update_chain, %LangChainError{} = error} ->
+          Logger.error("Received error when running the chain: #{error.message}")
+          {:error, error.message}
       end
     end)
   end

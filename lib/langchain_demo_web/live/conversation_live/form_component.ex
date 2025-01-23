@@ -22,7 +22,12 @@ defmodule LangChainDemoWeb.ConversationLive.FormComponent do
         phx-submit="save"
       >
         <.input field={@form[:name]} type="text" label="Name" phx-debounce="500" />
-        <.input field={@form[:model]} type="select" label="Model" options={Conversation.model_options()} />
+        <.input
+          field={@form[:model]}
+          type="select"
+          label="Model"
+          options={Conversation.model_options()}
+        />
 
         <.input
           type="range"
@@ -99,7 +104,11 @@ defmodule LangChainDemoWeb.ConversationLive.FormComponent do
     case Conversations.create_conversation(conversation_params) do
       {:ok, conversation} ->
         # create a default system message
-        Messages.create_message(conversation.id, %{role: :system, content: "You are a helpful assistant."})
+        Messages.create_message(conversation.id, %{
+          role: :system,
+          content: "You are a helpful assistant."
+        })
+
         notify_parent({:saved, conversation})
 
         {:noreply,

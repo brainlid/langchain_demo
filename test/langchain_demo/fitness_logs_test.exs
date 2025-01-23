@@ -17,7 +17,7 @@ defmodule LangChainDemo.FitnessLogsTest do
     end
 
     test "list_fitness_logs/0 returns all fitness_logs", %{user: user} do
-      fitness_log = fitness_log_fixture(user.id)
+      fitness_log = fitness_log_fixture(user.id, %{date: Date.utc_today() |> Date.shift(day: -3)})
       assert FitnessLogs.list_fitness_logs(user.id) == [fitness_log]
     end
 
@@ -27,9 +27,16 @@ defmodule LangChainDemo.FitnessLogsTest do
     end
 
     test "create_fitness_log/1 with valid data creates a fitness_log", %{user: user} do
-      valid_attrs = %{activity: "some activity", amount: 42, date: ~D[2023-10-06], units: "some units"}
+      valid_attrs = %{
+        activity: "some activity",
+        amount: 42,
+        date: ~D[2023-10-06],
+        units: "some units"
+      }
 
-      assert {:ok, %FitnessLog{} = fitness_log} = FitnessLogs.create_fitness_log(user.id, valid_attrs)
+      assert {:ok, %FitnessLog{} = fitness_log} =
+               FitnessLogs.create_fitness_log(user.id, valid_attrs)
+
       assert fitness_log.activity == "some activity"
       assert fitness_log.amount == 42
       assert fitness_log.date == ~D[2023-10-06]
@@ -42,9 +49,17 @@ defmodule LangChainDemo.FitnessLogsTest do
 
     test "update_fitness_log/2 with valid data updates the fitness_log", %{user: user} do
       fitness_log = fitness_log_fixture(user.id)
-      update_attrs = %{activity: "some updated activity", amount: 43, date: ~D[2023-10-07], units: "some updated units"}
 
-      assert {:ok, %FitnessLog{} = fitness_log} = FitnessLogs.update_fitness_log(fitness_log, update_attrs)
+      update_attrs = %{
+        activity: "some updated activity",
+        amount: 43,
+        date: ~D[2023-10-07],
+        units: "some updated units"
+      }
+
+      assert {:ok, %FitnessLog{} = fitness_log} =
+               FitnessLogs.update_fitness_log(fitness_log, update_attrs)
+
       assert fitness_log.activity == "some updated activity"
       assert fitness_log.amount == 43
       assert fitness_log.date == ~D[2023-10-07]
@@ -53,14 +68,20 @@ defmodule LangChainDemo.FitnessLogsTest do
 
     test "update_fitness_log/2 with invalid data returns error changeset", %{user: user} do
       fitness_log = fitness_log_fixture(user.id)
-      assert {:error, %Ecto.Changeset{}} = FitnessLogs.update_fitness_log(fitness_log, @invalid_attrs)
+
+      assert {:error, %Ecto.Changeset{}} =
+               FitnessLogs.update_fitness_log(fitness_log, @invalid_attrs)
+
       assert fitness_log == FitnessLogs.get_fitness_log!(user.id, fitness_log.id)
     end
 
     test "delete_fitness_log/1 deletes the fitness_log", %{user: user} do
       fitness_log = fitness_log_fixture(user.id)
       assert {:ok, %FitnessLog{}} = FitnessLogs.delete_fitness_log(fitness_log)
-      assert_raise Ecto.NoResultsError, fn -> FitnessLogs.get_fitness_log!(user.id, fitness_log.id) end
+
+      assert_raise Ecto.NoResultsError, fn ->
+        FitnessLogs.get_fitness_log!(user.id, fitness_log.id)
+      end
     end
 
     test "change_fitness_log/1 returns a fitness_log changeset", %{user: user} do

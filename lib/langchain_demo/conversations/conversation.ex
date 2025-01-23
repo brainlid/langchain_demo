@@ -15,9 +15,17 @@ defmodule LangChainDemo.Conversations.Conversation do
 
   def model_options() do
     [
-      {"gpt-4-1106-preview", "gpt-4-1106-preview"},
+      {"Anthropic claude-3-5-sonnet", "claude-3-5-sonnet-latest"},
+      {"Anthropic claude-3-5-haiku", "claude-3-5-haiku-latest"},
+      # https://us-west-2.console.aws.amazon.com/bedrock/home?region=us-west-2#/models
+      {"Bedrock: Anthropic Claude 3.5 Sonnet v2", "anthropic.claude-3-5-sonnet-20241022-v2:0"},
+      {"Bedrock: Anthropic Claude 3.5 Haiku", "anthropic.claude-3-5-haiku-20241022-v1:0"},
+      {"OpenAI o1", "o1"},
+      {"OpenAI o1-mini", "o1-mini"},
+      {"OpenAI gpt-4o", "gpt-4o"},
+      {"OpenAI gpt-4o mini", "gpt-4o-mini"},
+      {"OpenAI gpt-4-turbo", "gpt-4-turbo"},
       {"gpt-4", "gpt-4"},
-      {"gpt-3.5-turbo-16k", "gpt-3.5-turbo-16k"},
       {"gpt-3.5-turbo (stable)", "gpt-3.5-turbo"}
     ]
   end

@@ -8,7 +8,16 @@ defmodule LangChainDemo.FitnessUsersTest do
 
     import LangChainDemo.FitnessUsersFixtures
 
-    @invalid_attrs %{age: "not a number", overall_fitness_plan: nil, fitness_experience: "invalid", gender: nil, goals: nil, name: nil, resources: nil, why: nil}
+    @invalid_attrs %{
+      age: "not a number",
+      overall_fitness_plan: nil,
+      fitness_experience: "invalid",
+      gender: nil,
+      goals: nil,
+      name: nil,
+      resources: nil,
+      why: nil
+    }
 
     test "list_fitness_users/0 returns all fitness_users" do
       fitness_user = fitness_user_fixture()
@@ -21,7 +30,16 @@ defmodule LangChainDemo.FitnessUsersTest do
     end
 
     test "create_fitness_user/1 with valid data creates a fitness_user" do
-      valid_attrs = %{age: 42, overall_fitness_plan: "some overall_fitness_plan", fitness_experience: :intermediate, gender: "some gender", goals: "some goals", name: "some name", resources: "some resources", why: "some why"}
+      valid_attrs = %{
+        age: 42,
+        overall_fitness_plan: "some overall_fitness_plan",
+        fitness_experience: :intermediate,
+        gender: "some gender",
+        goals: "some goals",
+        name: "some name",
+        resources: "some resources",
+        why: "some why"
+      }
 
       assert {:ok, %FitnessUser{} = fitness_user} = FitnessUsers.create_fitness_user(valid_attrs)
       assert fitness_user.age == 42
@@ -40,9 +58,21 @@ defmodule LangChainDemo.FitnessUsersTest do
 
     test "update_fitness_user/2 with valid data updates the fitness_user" do
       fitness_user = fitness_user_fixture()
-      update_attrs = %{age: 43, overall_fitness_plan: "some updated overall_fitness_plan", fitness_experience: "advanced", gender: "some updated gender", goals: "some updated goals", name: "some updated name", resources: "some updated resources", why: "some updated why"}
 
-      assert {:ok, %FitnessUser{} = fitness_user} = FitnessUsers.update_fitness_user(fitness_user, update_attrs)
+      update_attrs = %{
+        age: 43,
+        overall_fitness_plan: "some updated overall_fitness_plan",
+        fitness_experience: "advanced",
+        gender: "some updated gender",
+        goals: "some updated goals",
+        name: "some updated name",
+        resources: "some updated resources",
+        why: "some updated why"
+      }
+
+      assert {:ok, %FitnessUser{} = fitness_user} =
+               FitnessUsers.update_fitness_user(fitness_user, update_attrs)
+
       assert fitness_user.age == 43
       assert fitness_user.overall_fitness_plan == "some updated overall_fitness_plan"
       assert fitness_user.fitness_experience == :advanced
@@ -55,7 +85,10 @@ defmodule LangChainDemo.FitnessUsersTest do
 
     test "update_fitness_user/2 with invalid data returns error changeset" do
       fitness_user = fitness_user_fixture()
-      assert {:error, %Ecto.Changeset{}} = FitnessUsers.update_fitness_user(fitness_user, @invalid_attrs)
+
+      assert {:error, %Ecto.Changeset{}} =
+               FitnessUsers.update_fitness_user(fitness_user, @invalid_attrs)
+
       assert fitness_user == FitnessUsers.get_fitness_user!(fitness_user.id)
     end
 

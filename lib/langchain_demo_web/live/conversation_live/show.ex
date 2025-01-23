@@ -7,6 +7,8 @@ defmodule LangChainDemoWeb.ConversationLive.Show do
   alias LangChainDemo.Messages
   alias LangChainDemo.Messages.Message
   alias LangChain.ChatModels.ChatOpenAI
+  alias LangChain.ChatModels.ChatAnthropic
+  alias LangChain.Utils.BedrockConfig
   alias LangChain.Chains.LLMChain
   alias Phoenix.LiveView.AsyncResult
 
@@ -275,8 +277,65 @@ defmodule LangChainDemoWeb.ConversationLive.Show do
     socket
   end
 
+  def setup_model(conversation, opts \\ [])
+
+  # AWS Bedrock Anthropic Claude
+  def setup_model(%Conversation{model: "anthropic.claude" <> _rest} = conversation, opts) do
+    # setup Anthropic in Bedrock
+    ChatAnthropic.new!(%{
+      bedrock: BedrockConfig.from_application_env!(),
+      model: conversation.model,
+      temperature: conversation.temperature,
+      frequency_penalty: conversation.frequency_penalty,
+      receive_timeout: 60_000 * 2,
+      stream: Keyword.get(opts, :stream, true)
+    })
+  end
+
+  def setup_model(%Conversation{model: "claude" <> _rest} = conversation, opts) do
+    # setup Anthropic
+    ChatAnthropic.new!(%{
+      model: conversation.model,
+      temperature: conversation.temperature,
+      frequency_penalty: conversation.frequency_penalty,
+      receive_timeout: 60_000 * 2,
+      stream: Keyword.get(opts, :stream, true)
+    })
+  end
+
+  def setup_model(%Conversation{model: "gpt" <> _rest} = conversation, opts) do
+    # setup OpenAI
+    ChatOpenAI.new!(%{
+      model: conversation.model,
+      temperature: conversation.temperature,
+      frequency_penalty: conversation.frequency_penalty,
+      receive_timeout: 60_000 * 2,
+      stream: Keyword.get(opts, :stream, true)
+    })
+  end
+
+  def setup_model(%Conversation{model: "o1" <> _rest} = conversation, opts) do
+    # setup OpenAI
+    ChatOpenAI.new!(%{
+      model: conversation.model,
+      temperature: conversation.temperature,
+      reasoning_effort: "medium",
+      reasoning_mode: true,
+      frequency_penalty: conversation.frequency_penalty,
+      receive_timeout: 60_000 * 2,
+      stream: Keyword.get(opts, :stream, true)
+    })
+  end
+
   defp assign_llm_chain(socket) do
     conversation = socket.assigns.conversation
+    live_view_pid = self()
+
+    handlers = %{
+      on_llm_new_delta: fn _chain, %LangChain.MessageDelta{} = delta ->
+        send(live_view_pid, {:chat_response, delta})
+      end
+    }
 
     # convert the DB stored message to LLMChain messages
     chain_messages =
@@ -286,16 +345,10 @@ defmodule LangChainDemoWeb.ConversationLive.Show do
 
     llm_chain =
       LLMChain.new!(%{
-        llm:
-          ChatOpenAI.new!(%{
-            model: conversation.model,
-            temperature: conversation.temperature,
-            frequency_penalty: conversation.frequency_penalty,
-            receive_timeout: 60_000 * 2,
-            stream: true
-          }),
-        verbose: false
+        llm: setup_model(conversation),
+        verbose: true
       })
+      |> LLMChain.add_callback(handlers)
       |> LLMChain.add_messages(chain_messages)
 
     assign(socket, :llm_chain, llm_chain)
@@ -303,22 +356,11 @@ defmodule LangChainDemoWeb.ConversationLive.Show do
 
   def run_chain(socket) do
     chain = socket.assigns.llm_chain
-    live_view_pid = self()
-
-    callback_fn = fn
-      %LangChain.MessageDelta{} = delta ->
-        send(live_view_pid, {:chat_response, delta})
-
-      %LangChain.Message{} = _message ->
-        # disregard the full-message callback. We'll use the delta
-        # send(live_view_pid, {:chat_response, message})
-        :ok
-    end
 
     socket
     |> assign(:async_result, AsyncResult.loading())
     |> start_async(:running_llm, fn ->
-      case LLMChain.run(chain, callback_fn: callback_fn) do
+      case LLMChain.run(chain) do
         # return the errors for display
         {:error, reason} ->
           {:error, reason}
