@@ -288,7 +288,7 @@ defmodule LangChainDemoWeb.ConversationLive.Show do
       temperature: conversation.temperature,
       frequency_penalty: conversation.frequency_penalty,
       receive_timeout: 60_000 * 2,
-      stream: Keyword.get(opts, :stream, true),
+      stream: Keyword.get(opts, :stream, true)
     })
   end
 
@@ -299,7 +299,7 @@ defmodule LangChainDemoWeb.ConversationLive.Show do
       temperature: conversation.temperature,
       frequency_penalty: conversation.frequency_penalty,
       receive_timeout: 60_000 * 2,
-      stream: Keyword.get(opts, :stream, true),
+      stream: Keyword.get(opts, :stream, true)
     })
   end
 
@@ -310,7 +310,7 @@ defmodule LangChainDemoWeb.ConversationLive.Show do
       temperature: conversation.temperature,
       frequency_penalty: conversation.frequency_penalty,
       receive_timeout: 60_000 * 2,
-      stream: Keyword.get(opts, :stream, true),
+      stream: Keyword.get(opts, :stream, true)
     })
   end
 
@@ -323,7 +323,7 @@ defmodule LangChainDemoWeb.ConversationLive.Show do
       reasoning_mode: true,
       frequency_penalty: conversation.frequency_penalty,
       receive_timeout: 60_000 * 2,
-      stream: Keyword.get(opts, :stream, true),
+      stream: Keyword.get(opts, :stream, true)
     })
   end
 

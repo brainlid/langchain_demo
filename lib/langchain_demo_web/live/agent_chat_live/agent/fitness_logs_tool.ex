@@ -45,7 +45,7 @@ defmodule LangChainDemoWeb.AgentChatLive.Agent.FitnessLogsTool do
   end
 
   @spec execute_get_fitness_logs(args :: %{String.t() => any()}, context :: map()) :: String.t()
-  def execute_get_fitness_logs(%{} = args, %{live_view_pid: pid, current_user: user} = _context) do
+  def execute_get_fitness_logs(%{} = args, %{live_view_pid: _pid, current_user: user} = _context) do
     # Use the context for the current_user
     days = Map.get(args, "days", nil)
     activity = Map.get(args, "activity", nil)
@@ -65,11 +65,12 @@ defmodule LangChainDemoWeb.AgentChatLive.Agent.FitnessLogsTool do
       ]
       |> Enum.reject(&is_nil(&1))
 
-    send(pid, {:function_run, "Retrieving fitness history."})
+    data =
+      user.id
+      |> FitnessLogs.list_fitness_logs(filters)
+      |> Jason.encode!()
 
-    user.id
-    |> FitnessLogs.list_fitness_logs(filters)
-    |> Jason.encode!()
+    {:ok, data}
   end
 
   @doc """
@@ -117,7 +118,7 @@ defmodule LangChainDemoWeb.AgentChatLive.Agent.FitnessLogsTool do
   @spec execute_create_fitness_log(args :: %{String.t() => any()}, context :: map()) :: String.t()
   def execute_create_fitness_log(
         %{} = args,
-        %{live_view_pid: pid, current_user: user} = _context
+        %{live_view_pid: _pid, current_user: user} = _context
       ) do
     # Use the context for the current_user
     case FitnessLogs.create_fitness_log(user.id, args) do

@@ -20,7 +20,15 @@ defmodule LangChainDemoWeb.ConversationLive.MessageFormComponent do
         phx-submit="save"
       >
         <.input field={@form[:role]} type="text" label="Role" />
-        <.input id="modal-content-input" field={@form[:content]} type="textarea" rows={6} label="Content" phx-update="ignore" phx-hook="CtrlEnterSubmits" />
+        <.input
+          id="modal-content-input"
+          field={@form[:content]}
+          type="textarea"
+          rows={6}
+          label="Content"
+          phx-update="ignore"
+          phx-hook="CtrlEnterSubmits"
+        />
         <.input field={@form[:edited]} type="checkbox" label="Edited" />
         <:actions>
           <.button phx-disable-with="Saving...">Save Message</.button>
