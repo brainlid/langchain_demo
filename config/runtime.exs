@@ -20,6 +20,12 @@ if System.get_env("PHX_SERVER") do
   config :langchain_demo, LangChainDemoWeb.Endpoint, server: true
 end
 
+# # LangChain AWS Bedrock authentication config
+# config :langchain,
+#   aws_access_key_id: System.fetch_env!("AWS_ACCESS_KEY_ID"),
+#   aws_secret_access_key: System.fetch_env!("AWS_SECRET_ACCESS_KEY"),
+#   aws_region: System.get_env("AWS_REGION", "us-east-1")
+
 if config_env() == :prod do
   database_path =
     System.get_env("DATABASE_PATH") ||
