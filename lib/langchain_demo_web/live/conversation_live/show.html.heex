@@ -29,8 +29,8 @@
         </div>
       </div>
       <div class="min-w-0 flex-auto">
-        <.markdown :if={message.role == "assistant"} text={message.content} />
-        <span :if={message.role != "assistant"} class="whitespace-pre-wrap">
+        <.markdown :if={message.role == :assistant} text={message.content} />
+        <span :if={message.role != :assistant} class="whitespace-pre-wrap">
           <%= message.content %>
         </span>
       </div>
@@ -69,8 +69,8 @@
           </div>
         </div>
         <div class="min-w-0 flex-auto">
-          <.markdown :if={@llm_chain.delta.role == "assistant"} text={@llm_chain.delta.content} />
-          <span :if={@llm_chain.delta.role != "assistant"} class="whitespace-pre-wrap">
+          <.markdown :if={@llm_chain.delta.role == :assistant} text={@llm_chain.delta.content} />
+          <span :if={@llm_chain.delta.role != :assistant} class="whitespace-pre-wrap">
             <%= @llm_chain.delta.content %>
           </span>
         </div>
