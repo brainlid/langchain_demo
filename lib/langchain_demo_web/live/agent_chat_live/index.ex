@@ -92,22 +92,23 @@ defmodule LangChainDemoWeb.AgentChatLive.Index do
   end
 
   @impl true
-  def handle_info({:chat_delta, %LangChain.MessageDelta{} = delta}, socket) do
+  def handle_info({:chat_delta, deltas}, socket) do
     # This is where LLM generated content gets processed and merged to the
     # LLMChain managed by the state in this LiveView process.
 
     # Apply the delta message to our tracked LLMChain. If it completes the
     # message, display the message
-    updated_chain = LLMChain.apply_delta(socket.assigns.llm_chain, delta)
+    updated_chain = LLMChain.apply_deltas(socket.assigns.llm_chain, deltas)
     # if this completed the delta, create the message and track on the chain
     socket =
       if updated_chain.delta == nil do
         # the delta completed the message. Examine the last message
         message = updated_chain.last_message
+        processed_content = LangChain.Message.ContentPart.content_to_string(message.content)
 
         append_display_message(socket, %ChatMessage{
           role: message.role,
-          content: message.content,
+          content: processed_content,
           tool_calls: message.tool_calls,
           tool_results: message.tool_results
         })
@@ -251,8 +252,8 @@ User says:
     live_view_pid = self()
 
     handlers = %{
-      on_llm_new_delta: fn _chain, %LangChain.MessageDelta{} = delta ->
-        send(live_view_pid, {:chat_delta, delta})
+      on_llm_new_delta: fn _chain, deltas ->
+        send(live_view_pid, {:chat_delta, deltas})
       end,
       # record tool result
       on_tool_response_created: fn _chain, %LangChain.Message{role: :tool} = message ->
