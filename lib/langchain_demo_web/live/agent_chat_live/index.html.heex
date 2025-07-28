@@ -70,8 +70,11 @@
                 <div
                   class="cursor-pointer"
                   phx-click={
-                    JS.toggle_class("hidden",
-                      to: ["#call-name-#{call.call_id}", "#call-details-#{call.call_id}"]
+                    JS.toggle(
+                      to: "#call-details-#{call.call_id}"
+                    )
+                    |> JS.toggle(
+                      to: "#call-name-#{call.call_id}"
                     )
                   }
                 >
@@ -104,11 +107,11 @@
               <div
                 class="min-w-0 cursor-pointer"
                 phx-click={
-                  JS.toggle_class("hidden",
-                    to: [
-                      "#tool-result-name-#{result.tool_call_id}",
-                      "#tool-result-details-#{result.tool_call_id}"
-                    ]
+                  JS.toggle(
+                    to: "#tool-result-name-#{result.tool_call_id}"
+                  )
+                  |> JS.toggle(
+                    to: "#tool-result-details-#{result.tool_call_id}"
                   )
                 }
               >
@@ -138,7 +141,7 @@
             </div>
           </div>
           <div class="min-w-0 flex-auto">
-            <.markdown :if={@llm_chain.delta.role == :assistant} text={@llm_chain.delta.content} />
+            <.markdown :if={@llm_chain.delta.role == :assistant} text={LangChain.Message.ContentPart.content_to_string(@llm_chain.delta.merged_content)} />
           </div>
         </div>
       </li>
