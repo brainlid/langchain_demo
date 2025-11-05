@@ -8,7 +8,7 @@ export const hooks = {
       this.el.addEventListener("keydown", (e) => {
         if (e.ctrlKey && e.key === 'Enter') {
           let form = e.target.closest('form');
-          form.dispatchEvent(new Event('submit', {bubbles: true}));
+          form.dispatchEvent(new Event('submit', {bubbles: true, cancelable: true}));
           e.stopPropagation();
           e.preventDefault();
         }
