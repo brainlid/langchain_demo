@@ -6,6 +6,8 @@ defmodule LangChainDemoWeb.AgentChatLive.Index do
   alias LangChainDemoWeb.AgentChatLive.Agent.ChatMessage
   alias LangChain.Chains.LLMChain
   alias LangChain.Message
+  alias LangChain.Message.ContentPart
+  alias LangChain.MessageDelta
   alias LangChain.ChatModels.ChatOpenAI
   alias LangChain.PromptTemplate
   alias LangChain.LangChainError
@@ -41,6 +43,7 @@ defmodule LangChainDemoWeb.AgentChatLive.Index do
       ])
       |> reset_chat_message_form()
       |> assign_llm_chain()
+      |> assign(:current_delta, nil)
       |> assign(:async_result, %AsyncResult{})
 
     {:noreply, socket}
@@ -93,45 +96,22 @@ defmodule LangChainDemoWeb.AgentChatLive.Index do
 
   @impl true
   def handle_info({:chat_delta, deltas}, socket) do
-    # This is where LLM generated content gets processed and merged to the
-    # LLMChain managed by the state in this LiveView process.
-
-    # Apply the delta message to our tracked LLMChain. If it completes the
-    # message, display the message
-    had_delta = socket.assigns.llm_chain.delta != nil
-    updated_chain = LLMChain.apply_deltas(socket.assigns.llm_chain, deltas)
-    # if the delta just completed, create the message and track on the chain
-    socket =
-      if had_delta and updated_chain.delta == nil do
-        # the delta completed the message. Examine the last message
-        message = updated_chain.last_message
-        processed_content = LangChain.Message.ContentPart.content_to_string(message.content)
-
-        append_display_message(socket, %ChatMessage{
-          role: message.role,
-          content: processed_content,
-          tool_calls: message.tool_calls,
-          tool_results: message.tool_results
-        })
-      else
-        socket
-      end
-
-    {:noreply, assign(socket, :llm_chain, updated_chain)}
+    merged_delta = MessageDelta.merge_deltas(socket.assigns.current_delta, deltas)
+    {:noreply, assign(socket, :current_delta, merged_delta)}
   end
 
-  def handle_info({:tool_executed, tool_message}, socket) do
-    message = %ChatMessage{
-      role: tool_message.role,
-      hidden: false,
-      content: nil,
-      tool_results: tool_message.tool_results
-    }
+  def handle_info({:message_processed, %LangChain.Message{} = message}, socket) do
+    processed_content = ContentPart.content_to_string(message.content)
 
     socket =
       socket
-      |> assign(:llm_chain, LLMChain.add_message(socket.assigns.llm_chain, tool_message))
-      |> append_display_message(message)
+      |> append_display_message(%ChatMessage{
+        role: message.role,
+        content: processed_content,
+        tool_calls: message.tool_calls,
+        tool_results: message.tool_results
+      })
+      |> assign(:current_delta, nil)
 
     {:noreply, socket}
   end
@@ -256,9 +236,8 @@ User says:
       on_llm_new_delta: fn _chain, deltas ->
         send(live_view_pid, {:chat_delta, deltas})
       end,
-      # record tool result
-      on_tool_response_created: fn _chain, %LangChain.Message{role: :tool} = message ->
-        send(live_view_pid, {:tool_executed, message})
+      on_message_processed: fn _chain, message ->
+        send(live_view_pid, {:message_processed, message})
       end
     }
 

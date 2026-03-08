@@ -11,6 +11,7 @@ defmodule LangChainDemoWeb.ConversationLive.Show do
   alias LangChain.Utils.BedrockConfig
   alias LangChain.Chains.LLMChain
   alias LangChain.Message.ContentPart
+  alias LangChain.MessageDelta
   alias Phoenix.LiveView.AsyncResult
 
   @impl true
@@ -22,6 +23,7 @@ defmodule LangChainDemoWeb.ConversationLive.Show do
       |> assign_conversation(conversation)
       |> assign_messages()
       |> assign_llm_chain()
+      |> assign(:current_delta, nil)
       |> assign(:async_result, %AsyncResult{})
 
     {:ok, socket}
@@ -168,7 +170,7 @@ defmodule LangChainDemoWeb.ConversationLive.Show do
       # delta can be converted to a "cancelled" message
       updated_chain = LLMChain.cancel_delta(chain, :cancelled)
 
-      # save the cancelled message
+      # save the cancelled partial message
       Messages.create_message(
         socket.assigns.conversation.id,
         langchain_message_to_db_attrs(updated_chain.last_message)
@@ -184,29 +186,24 @@ defmodule LangChainDemoWeb.ConversationLive.Show do
 
   @impl true
   def handle_info({:chat_response, deltas}, socket) do
-    had_delta = socket.assigns.llm_chain.delta != nil
-    updated_chain = LLMChain.apply_deltas(socket.assigns.llm_chain, deltas)
+    merged_delta = MessageDelta.merge_deltas(socket.assigns.current_delta, deltas)
+    {:noreply, assign(socket, :current_delta, merged_delta)}
+  end
+
+  def handle_info({:message_processed, %LangChain.Message{} = message}, socket) do
+    {:ok, _message} =
+      Messages.create_message(
+        socket.assigns.conversation.id,
+        langchain_message_to_db_attrs(message)
+      )
 
     socket =
-      cond do
-        # if the delta just completed, create the message
-        had_delta and updated_chain.delta == nil ->
-          {:ok, _message} =
-            Messages.create_message(
-              socket.assigns.conversation.id,
-              langchain_message_to_db_attrs(updated_chain.last_message)
-            )
+      socket
+      |> assign_messages()
+      |> flash_error_if_stopped_for_limit()
+      |> assign(:current_delta, nil)
 
-          socket
-          |> assign_messages()
-          |> assign(:llm_chain, updated_chain)
-          |> flash_error_if_stopped_for_limit()
-
-        true ->
-          socket
-      end
-
-    {:noreply, assign(socket, :llm_chain, updated_chain)}
+    {:noreply, socket}
   end
 
   def handle_info({FormComponent, {:saved, %Conversation{} = conversation}}, socket) do
@@ -342,6 +339,9 @@ defmodule LangChainDemoWeb.ConversationLive.Show do
     handlers = %{
       on_llm_new_delta: fn _chain, deltas ->
         send(live_view_pid, {:chat_response, deltas})
+      end,
+      on_message_processed: fn _chain, message ->
+        send(live_view_pid, {:message_processed, message})
       end
     }
 
