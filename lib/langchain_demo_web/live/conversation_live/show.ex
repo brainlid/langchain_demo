@@ -10,6 +10,7 @@ defmodule LangChainDemoWeb.ConversationLive.Show do
   alias LangChain.ChatModels.ChatAnthropic
   alias LangChain.Utils.BedrockConfig
   alias LangChain.Chains.LLMChain
+  alias LangChain.Message.ContentPart
   alias Phoenix.LiveView.AsyncResult
 
   @impl true
@@ -170,7 +171,7 @@ defmodule LangChainDemoWeb.ConversationLive.Show do
       # save the cancelled message
       Messages.create_message(
         socket.assigns.conversation.id,
-        Map.from_struct(updated_chain.last_message)
+        langchain_message_to_db_attrs(updated_chain.last_message)
       )
 
       socket
@@ -182,17 +183,18 @@ defmodule LangChainDemoWeb.ConversationLive.Show do
   end
 
   @impl true
-  def handle_info({:chat_response, %LangChain.MessageDelta{} = delta}, socket) do
-    updated_chain = LLMChain.apply_delta(socket.assigns.llm_chain, delta)
+  def handle_info({:chat_response, deltas}, socket) do
+    had_delta = socket.assigns.llm_chain.delta != nil
+    updated_chain = LLMChain.apply_deltas(socket.assigns.llm_chain, deltas)
 
     socket =
       cond do
-        # if this completed the delta and it's not a message, create the message
-        updated_chain.delta == nil ->
+        # if the delta just completed, create the message
+        had_delta and updated_chain.delta == nil ->
           {:ok, _message} =
             Messages.create_message(
               socket.assigns.conversation.id,
-              Map.from_struct(updated_chain.last_message)
+              langchain_message_to_db_attrs(updated_chain.last_message)
             )
 
           socket
@@ -254,6 +256,12 @@ defmodule LangChainDemoWeb.ConversationLive.Show do
     |> DateTime.from_naive!("Etc/UTC")
     |> DateTime.shift_zone!("America/Denver")
     |> Calendar.strftime("%m/%d/%Y %H:%M:%S")
+  end
+
+  defp langchain_message_to_db_attrs(%LangChain.Message{} = message) do
+    message
+    |> Map.from_struct()
+    |> Map.put(:content, ContentPart.content_to_string(message.content))
   end
 
   defp assign_conversation(socket, conversation) do
@@ -332,8 +340,8 @@ defmodule LangChainDemoWeb.ConversationLive.Show do
     live_view_pid = self()
 
     handlers = %{
-      on_llm_new_delta: fn _chain, %LangChain.MessageDelta{} = delta ->
-        send(live_view_pid, {:chat_response, delta})
+      on_llm_new_delta: fn _chain, deltas ->
+        send(live_view_pid, {:chat_response, deltas})
       end
     }
 

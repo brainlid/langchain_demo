@@ -98,10 +98,11 @@ defmodule LangChainDemoWeb.AgentChatLive.Index do
 
     # Apply the delta message to our tracked LLMChain. If it completes the
     # message, display the message
+    had_delta = socket.assigns.llm_chain.delta != nil
     updated_chain = LLMChain.apply_deltas(socket.assigns.llm_chain, deltas)
-    # if this completed the delta, create the message and track on the chain
+    # if the delta just completed, create the message and track on the chain
     socket =
-      if updated_chain.delta == nil do
+      if had_delta and updated_chain.delta == nil do
         # the delta completed the message. Examine the last message
         message = updated_chain.last_message
         processed_content = LangChain.Message.ContentPart.content_to_string(message.content)

@@ -17,7 +17,7 @@ defmodule LangChainDemoWeb.CoreComponents do
   use Phoenix.Component
 
   alias Phoenix.LiveView.JS
-  import LangChainDemoWeb.Gettext
+  use Gettext, backend: LangChainDemoWeb.Gettext
 
   @doc """
   Renders a modal.

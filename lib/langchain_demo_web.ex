@@ -43,7 +43,7 @@ defmodule LangChainDemoWeb do
         layouts: [html: LangChainDemoWeb.Layouts]
 
       import Plug.Conn
-      import LangChainDemoWeb.Gettext
+      use Gettext, backend: LangChainDemoWeb.Gettext
 
       unquote(verified_routes())
     end
@@ -85,7 +85,7 @@ defmodule LangChainDemoWeb do
       import Phoenix.HTML
       # Core UI components and translation
       import LangChainDemoWeb.CoreComponents
-      import LangChainDemoWeb.Gettext
+      use Gettext, backend: LangChainDemoWeb.Gettext
 
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS

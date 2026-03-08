@@ -15,6 +15,8 @@ defmodule LangChainDemo.Conversations.Conversation do
 
   def model_options() do
     [
+      {"Anthropic claude-4-6-sonnet", "claude-sonnet-4-6"},
+      {"Anthropic claude-4-5-haiku", "claude-haiku-4-5"},
       {"Anthropic claude-3-5-sonnet", "claude-3-5-sonnet-latest"},
       {"Anthropic claude-3-5-haiku", "claude-3-5-haiku-latest"},
       # https://us-west-2.console.aws.amazon.com/bedrock/home?region=us-west-2#/models
