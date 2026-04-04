@@ -369,14 +369,11 @@ defmodule LangChainDemoWeb.ConversationLive.Show do
     |> assign(:async_result, AsyncResult.loading())
     |> start_async(:running_llm, fn ->
       case LLMChain.run(chain) do
-        # return the errors for display
-        {:error, reason} ->
-          {:error, reason}
-
-        # Don't return a large success result. The callbacks return what we
-        # want.
-        _other ->
+        {:ok, _updated_chain} ->
           :ok
+
+        {:error, _updated_chain, %LangChain.LangChainError{} = error} ->
+          {:error, error.message}
       end
     end)
   end
