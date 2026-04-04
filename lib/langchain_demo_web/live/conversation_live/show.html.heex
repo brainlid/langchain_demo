@@ -69,7 +69,10 @@
           </div>
         </div>
         <div class="min-w-0 flex-auto">
-          <.markdown :if={@current_delta.role == :assistant} text={LangChain.Message.ContentPart.content_to_string(@current_delta.merged_content)} />
+          <.markdown
+            :if={@current_delta.role == :assistant}
+            text={LangChain.Message.ContentPart.content_to_string(@current_delta.merged_content)}
+          />
           <span :if={@current_delta.role != :assistant} class="whitespace-pre-wrap">
             <%= LangChain.Message.ContentPart.content_to_string(@current_delta.merged_content) %>
           </span>
