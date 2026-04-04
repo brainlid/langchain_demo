@@ -8,7 +8,7 @@ defmodule LangChainDemoWeb.AgentChatLive.Index do
   alias LangChain.Message
   alias LangChain.Message.ContentPart
   alias LangChain.MessageDelta
-  alias LangChain.ChatModels.ChatOpenAI
+  alias LangChain.ChatModels.ChatAnthropic
   alias LangChain.PromptTemplate
   alias LangChain.LangChainError
   alias LangChainDemoWeb.AgentChatLive.Agent.UpdateCurrentUserFunction
@@ -244,12 +244,13 @@ User says:
     llm_chain =
       LLMChain.new!(%{
         llm:
-          ChatOpenAI.new!(%{
-            model: "gpt-4o",
+          ChatAnthropic.new!(%{
+            model: "claude-haiku-4-5",
             # don't get creative with answers
             temperature: 0,
             request_timeout: 60_000,
-            stream: true
+            stream: true,
+            cache_control: %{"type" => "ephemeral"}
           }),
         custom_context: %{
           live_view_pid: self(),

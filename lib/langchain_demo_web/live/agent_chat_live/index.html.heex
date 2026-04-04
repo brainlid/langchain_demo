@@ -70,12 +70,8 @@
                 <div
                   class="cursor-pointer"
                   phx-click={
-                    JS.toggle(
-                      to: "#call-details-#{call.call_id}"
-                    )
-                    |> JS.toggle(
-                      to: "#call-name-#{call.call_id}"
-                    )
+                    JS.toggle(to: "#call-details-#{call.call_id}")
+                    |> JS.toggle(to: "#call-name-#{call.call_id}")
                   }
                 >
                   <.call_display_name
@@ -107,12 +103,8 @@
               <div
                 class="min-w-0 cursor-pointer"
                 phx-click={
-                  JS.toggle(
-                    to: "#tool-result-name-#{result.tool_call_id}"
-                  )
-                  |> JS.toggle(
-                    to: "#tool-result-details-#{result.tool_call_id}"
-                  )
+                  JS.toggle(to: "#tool-result-name-#{result.tool_call_id}")
+                  |> JS.toggle(to: "#tool-result-details-#{result.tool_call_id}")
                 }
               >
                 <.tool_result_display_name
@@ -141,7 +133,12 @@
             </div>
           </div>
           <div class="min-w-0 flex-auto">
-            <.markdown :if={@current_delta.role == :assistant} text={LangChain.Message.ContentPart.content_to_string(@current_delta.merged_content)} />
+            <.markdown
+              :if={@current_delta.role == :assistant}
+              text={
+                LangChain.Message.ContentPart.content_to_string(@current_delta.merged_content)
+              }
+            />
           </div>
         </div>
       </li>
